@@ -1,4 +1,21 @@
-# Cans
+<p align="center">
+  <img src="docs/media/icon.png" width="112" alt="Cans app icon">
+</p>
+
+<h1 align="center">Cans</h1>
+
+<p align="center">
+  <b>Your Sony WH-1000XM4 and WH-1000XM5, one click from the Mac menu bar.</b><br>
+  Noise cancelling, EQ, Speak-to-Chat and more, without reaching for your phone.
+</p>
+
+<p align="center">
+  <a href="../../releases/latest"><img src="https://img.shields.io/badge/Download_for_macOS-F2A33A?style=for-the-badge&logo=apple&logoColor=1C1D20&labelColor=F2A33A&color=F2A33A" height="40" alt="Download for macOS"></a>
+</p>
+
+<p align="center">
+  <sub>Free and open source · macOS 14+ · 1.3 MB download · no account, no network access</sub>
+</p>
 
 <p align="center">
   <picture>
@@ -7,76 +24,103 @@
   </picture>
 </p>
 
-A menu bar controller for Sony **WH-1000XM4** and **WH-1000XM5** headphones on macOS. Everything Sony Sound Connect does that makes sense on a Mac, one click from the menu bar, no phone needed.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/yash.raj)
-
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/media/demo-dark.gif">
     <img src="docs/media/demo-light.gif" alt="Cans switching noise control, sweeping the ambient level, recalling scenes, changing EQ, and browsing Inserts on a real WH-1000XM4" width="660">
   </picture>
+  <br>
+  <sub>Recorded live on a WH-1000XM4. Every change is read back from the headphones.</sub>
 </p>
 
-<p align="center"><sub>Recorded live on a WH-1000XM4. Every change is read back from the headphones.</sub></p>
+## What it does
 
-## What it controls
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Noise control in one click</b><br>
+      <sub>Noise cancelling, Ambient or Off, a 20-step ambient fader, Focus on Voice, and Office / Aware scenes. ⌥⌘A switches from anywhere.</sub><br><br>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/feat-noise-dark.gif">
+        <img src="docs/media/feat-noise-light.gif" alt="Switching from noise cancelling to ambient; the illustration's sound waves grow with the level" width="100%">
+      </picture>
+    </td>
+    <td width="50%" valign="top">
+      <b>EQ on real faders</b><br>
+      <sub>Sony's presets, Clear Bass and a five-band curve. Save your own curves on the Mac.</sub><br><br>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/feat-eq-dark.gif">
+        <img src="docs/media/feat-eq-light.gif" alt="The EQ faders moving to Bass Boost, then Bright" width="100%">
+      </picture>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <b>Every setting, one level down</b><br>
+      <sub>Speak-to-Chat, NC Optimizer with air pressure, DSEE Extreme, multipoint, touch controls, auto power off and more.</sub><br><br>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/feat-inserts-dark.gif">
+        <img src="docs/media/feat-inserts-light.gif" alt="Browsing the Inserts pages: Speak-to-Chat, NC Optimizer, Sound and Controls" width="100%">
+      </picture>
+    </td>
+    <td width="50%" valign="top">
+      <b>Your mode, in the menu bar</b><br>
+      <sub>The icon's band lights up to show Off, Ambient or Noise cancelling, next to your battery level.</sub><br><br>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/menubar-dark.png">
+        <img src="docs/media/menubar-light.png" alt="The Cans menu bar icon in its three states: Off, Ambient and Noise cancelling" width="100%">
+      </picture>
+    </td>
+  </tr>
+</table>
+
+Cans also shows **what's playing in any app** (Spotify, Music, browsers…) with play/pause/skip, plus battery, codec and DSEE status.
+
+### Light and dark
+
+It follows your Mac's appearance.
+
+<img src="docs/media/split.jpg" alt="The Cans panel in dark mode and light mode, side by side" width="100%">
+
+## Install
+
+1. Download `Cans.zip` from the [latest release](../../releases/latest) and unzip it.
+2. Move **Cans.app** to **/Applications**.
+3. On first launch, right-click **Cans.app** → **Open**. It's ad-hoc signed, not notarized. If macOS still refuses, go to **System Settings → Privacy & Security** and click **Open Anyway**.
+4. Allow Bluetooth access when asked.
+
+Verify the download with `shasum -a 256 -c Cans.zip.sha256`.
+
+## Good to know
+
+- **One app at a time.** Only one device can hold Sony's control channel. If Cans says **Busy**, close Sound Connect on your phone; Cans retries on its own.
+- **Keyboard.** ⌥⌘A toggles NC and Ambient from anywhere. While the panel is open, keys 1/2/3 pick Off/NC/Ambient.
+- **Light footprint.** About 8–18 MB of memory, 0% CPU when idle, and about 0.2% while the animated panel is open.
+- **Out of scope.** Phone-only Sound Connect features: adaptive sound control, 360 Reality Audio setup, and the activity log. Volume stays with your Mac's volume keys, because the headphones ignore volume changes while nothing is playing.
+- **Easter eggs.** The headphone illustration reacts to your listening mode, and it hides a couple of surprises.
+
+<details>
+<summary><b>Full compatibility</b></summary>
 
 | | WH-1000XM4 | WH-1000XM5 |
 |---|---|---|
 | Noise cancelling / Ambient / Off, ambient level, Focus on Voice | ✓ | ✓ |
 | Battery, EQ presets, Clear Bass + 5-band custom EQ, saved Mac presets | ✓ | ✓ |
 | Codec and DSEE status | ✓ | – |
-| Now playing from any app (Spotify, Music, browsers…), play/pause/skip | ✓ | ✓ |
+| Now playing from any app, play/pause/skip | ✓ | ✓ |
 | Speak-to-Chat (on/off, sensitivity, timeout, voice focus) | ✓ | – |
 | NC Optimizer with air-pressure readout | ✓ | – |
 | DSEE Extreme, sound quality vs. stable connection | ✓ | – |
 | Touch panel, custom button, pause when taken off, auto power off | ✓ | – |
 | Multipoint, voice guidance, power off | ✓ | – |
 
-The XM4 controls use Sony's MDR v1 protocol. Every command was verified on a real WH-1000XM4 (firmware 3.0.1). XM5 support covers what the original XM5 Control app implemented over MDR v2.
+Every XM4 command was verified on a real WH-1000XM4 (firmware 3.0.1). XM5 support covers what the original XM5 Control app implemented; XM5 bug reports are very welcome.
 
-Also included: a global **⌥⌘A** shortcut to toggle NC and Ambient, keys 1/2/3 for Off/NC/Ambient while the popover is open, launch at login, and automatic reconnection.
+</details>
 
-Phone-only Sound Connect features are intentionally out of scope: adaptive sound control, 360 Reality Audio setup, and the activity log. Volume stays with your Mac's volume keys: the headphones ignore volume writes while nothing is playing, so a second volume control would only work sometimes.
+## Developers
 
-Cans follows the system appearance (light and dark). The headphone illustration reacts to the listening mode, and it has a couple of easter eggs.
-
-## Footprint
-
-About 8–18 MB of memory, 0% CPU when idle, and about 0.2% while the animated popover is open (all motion runs in Core Animation). A 4.7 MB universal app (1.3 MB download) with no third-party dependencies, no network access, no accounts and no analytics.
-
-**How Now Playing works.** macOS doesn't pass track info to the headphones, and since macOS 15.4 its system Now Playing (what Control Center shows) only answers Apple-signed processes. So while the popover is open, Cans runs a tiny bundled helper library inside Apple's `/usr/bin/perl` (the approach of the open-source mediaremote-adapter project) to read it and to send play/pause/skip. It stops when the popover closes. For this reason Cans isn't sandboxed; it's distributed outside the App Store.
-
-## Install
-
-1. Download `Cans.zip` from the [latest release](../../releases/latest) and unzip it.
-2. Move **Cans.app** to **/Applications**.
-3. The build is ad-hoc signed, not notarized, so on first launch right-click **Cans.app** → **Open**. If macOS still refuses, go to **System Settings → Privacy & Security** and click **Open Anyway**.
-4. Allow Bluetooth access when asked.
-
-Verify the download with `shasum -a 256 -c Cans.zip.sha256`.
-
-Only one app can hold Sony's control channel at a time. If Cans says **Busy**, close Sound Connect on your phone; Cans retries on its own.
-
-## Build
-
-```sh
-brew install xcodegen
-xcodegen                    # generates Cans.xcodeproj from project.yml
-open Cans.xcodeproj         # or: scripts/release.sh → release/Cans.zip
-```
-
-Requires Xcode 16+ and macOS 14+. Pushing a `vX.Y.Z` tag runs `.github/workflows/release.yml`, which tests, builds, and publishes the zip to GitHub Releases.
-
-Debug builds take capture flags for README media: `--ui-test-host` shows the panel in a window, `--demo-tour` walks through the controls on the connected headphones and then restores NC with EQ off, `--demo-name=WH-1000XM4` hides a personal device name, `--demo-track="Title|Artist|App"` shows a stand-in track, and `--appearance=dark|light` forces an appearance.
-
-### End-to-end tests (real headphones)
-
-`scripts/e2e.sh` runs the full release gate against a paired, powered-on WH-1000XM4: a hardware suite that changes each setting, re-reads everything from the headphones, checks they hold it, and restores it, plus a UI suite that drives the real app. Quit Cans and close Sound Connect on your phone first, since only one app can own the control channel. `CANS_E2E_MULTIPOINT=1` also toggles multipoint, which may restart the headphones.
-
-To keep macOS from asking for Bluetooth permission after every rebuild, sign debug builds with a stable local identity: create a code-signing certificate in Keychain Access and put `CODE_SIGN_IDENTITY = <its name>` in the gitignored `Configuration/Local.xcconfig`.
+Building, the protocol, how Now Playing works, and the end-to-end tests that run against real headphones are all in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Credits
 
@@ -87,6 +131,8 @@ Cans is not affiliated with or endorsed by Sony. Sony, WH-1000XM4 and WH-1000XM5
 ## Support
 
 Cans is free and open source. If it saves you reaching for your phone, you can [buy me a coffee](https://buymeacoffee.com/yash.raj).
+
+<a href="https://buymeacoffee.com/yash.raj"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 
 ## License
 
