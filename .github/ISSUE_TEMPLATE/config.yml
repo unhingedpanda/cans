@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Cans won't open ("cannot be verified")
+    url: https://github.com/unhingedpanda/cans#install
+    about: Cans isn't notarized yet. On macOS 15+, open it once, then click Open Anyway in System Settings → Privacy & Security.

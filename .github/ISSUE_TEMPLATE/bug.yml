@@ -1,0 +1,31 @@
+name: Something isn't working
+description: A control that doesn't work, a crash, or Cans not connecting.
+labels: [bug]
+body:
+  - type: dropdown
+    id: model
+    attributes:
+      label: Headphones
+      options: [WH-1000XM4, WH-1000XM5, Other]
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      placeholder: macOS 15.6, MacBook Air M2
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you clicked, what you expected, and what the headphones actually did.
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Diagnostics report
+      description: In Cans, open Inserts → Diagnostics → Copy report, and paste it here. It includes your headphones' Bluetooth address and name; delete those lines if you'd rather not share them.
+      render: text
