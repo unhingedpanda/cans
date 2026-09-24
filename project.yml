@@ -95,6 +95,9 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_MODULE_NAME: CansUITests
+        # XCUIApplication is @MainActor in Xcode 16's SDK; UI tests drive it synchronously, so they
+        # stay in Swift 5 mode (strict concurrency checks would reject every call on CI's Xcode).
+        SWIFT_VERSION: "5.0"
 schemes:
   Cans:
     build:
