@@ -818,6 +818,12 @@ struct MenuBarView: View {
         if let error = settings.launchAtLoginError {
             Text(error).font(.system(size: 11)).foregroundStyle(Console.legend).padding(.top, 8)
         }
+        RackRow(title: "Support Cans", detail: "Free and open source") {
+            LampButton(title: "Buy me a coffee", lit: false, height: 26, fontSize: 10.5) {
+                if let url = URL(string: "https://buymeacoffee.com/yash.raj") { NSWorkspace.shared.open(url) }
+            }
+            .frame(width: 150)
+        }
     }
 
     private var diagnosticsSection: some View {

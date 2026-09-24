@@ -3,6 +3,7 @@
 A menu bar controller for Sony **WH-1000XM4** and **WH-1000XM5** headphones on macOS. Everything Sony Sound Connect does that makes sense on a Mac, one click from the menu bar, no phone needed.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/yash.raj)
 
 ## What it controls
 
@@ -64,6 +65,10 @@ To keep macOS from asking for Bluetooth permission after every rebuild, sign deb
 Cans started as a fork of [XM5 Control](https://github.com/Maadlou/xm5-control-macos) by Maadlou (MIT). The protocol work draws on [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) and [mos9527/SonyHeadphonesClient](https://github.com/mos9527/SonyHeadphonesClient). The headphone illustration is original artwork made for Cans; see [CREDITS.md](CREDITS.md).
 
 Cans is not affiliated with or endorsed by Sony. Sony, WH-1000XM4 and WH-1000XM5 are trademarks of Sony Group Corporation, used here only to identify compatible products.
+
+## Support
+
+Cans is free and open source. If it saves you reaching for your phone, you can [buy me a coffee](https://buymeacoffee.com/yash.raj).
 
 ## License
 
