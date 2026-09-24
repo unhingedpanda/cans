@@ -29,6 +29,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "::warning title=Unnotarized build::Ad-hoc signed; first launch needs right-click → Open."
+          echo "::warning title=Unnotarized build::Ad-hoc signed, not notarized: first launch needs Open Anyway in Privacy & Security (macOS 15+)."
           gh release create "$GITHUB_REF_NAME" release/Cans.zip release/Cans.zip.sha256 \
             --title "Cans ${GITHUB_REF_NAME#v}" --generate-notes
