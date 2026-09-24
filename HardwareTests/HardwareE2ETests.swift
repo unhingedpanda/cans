@@ -212,7 +212,8 @@ final class HardwareE2ETests: XCTestCase {
 
     func testNCOptimizerStartsAndCancels() async throws {
         dev.startOptimizer()
-        try await until("optimizer running", timeout: 6) { self.dev.optimizer.isRunning }
+        // .starting is Cans's own state; only a reported phase proves the headphones began measuring.
+        try await until("optimizer measuring", timeout: 6) { self.dev.optimizer == .measuringWear }
         try await Task.sleep(for: .milliseconds(800))
         dev.cancelOptimizer()
         try await until("optimizer idle", timeout: 6) { self.dev.optimizer == .idle }

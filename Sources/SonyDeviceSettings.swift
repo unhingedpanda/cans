@@ -51,11 +51,12 @@ final class SonyDeviceSettings: ObservableObject {
     }
 
     enum OptimizerState: Equatable, Sendable {
-        case idle, measuringWear, measuringPressure, analyzing, finished
+        case idle, starting, measuringWear, measuringPressure, analyzing, finished
         var isRunning: Bool { self != .idle && self != .finished }
         var title: String {
             switch self {
             case .idle: "Ready"
+            case .starting: "Starting…"
             case .measuringWear: "Measuring fit…"
             case .measuringPressure: "Measuring pressure…"
             case .analyzing: "Analyzing…"
@@ -140,7 +141,15 @@ final class SonyDeviceSettings: ObservableObject {
         send([0xF6, 0x06], false)
     }
     func setVoiceGuidance(_ on: Bool) { voiceGuidance = on; send([0x48, 0x01, 0x01, on ? 1 : 0], true) }
-    func startOptimizer() { optimizer = .measuringWear; send([0x84, 0x01, 0x00, 0x01], false) }
+    /// Shows "Starting…" until the headphones report a phase; if they never do, it falls back to idle
+    /// rather than claiming a measurement that isn't happening.
+    func startOptimizer() {
+        optimizer = .starting
+        send([0x84, 0x01, 0x00, 0x01], false)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+            if self?.optimizer == .starting { self?.optimizer = .idle }
+        }
+    }
     func cancelOptimizer() { send([0x84, 0x01, 0x00, 0x00], false) }
     func powerOff() { send([0x22, 0x00, 0x01], false) }
 

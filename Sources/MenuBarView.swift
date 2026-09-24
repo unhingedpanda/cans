@@ -211,7 +211,7 @@ struct MenuBarView: View {
     private static var isSmallHours: Bool { (2...4).contains(Calendar.current.component(.hour, from: Date())) }
 
     private var linkLamp: some View {
-        let live = headphones.isReady
+        let live = headphones.isReady && !headphones.isUnresponsive
         return HStack(spacing: 5) {
             Circle()
                 .fill(live ? Console.signal : Console.unlit)
@@ -224,7 +224,8 @@ struct MenuBarView: View {
     }
 
     private var linkLegend: String {
-        switch headphones.linkState {
+        if headphones.isReady { return "No reply" }
+        return switch headphones.linkState {
         case .opening, .handshaking: "Linking"
         case .controlBusy: "Busy"
         case .failed: "Fault"

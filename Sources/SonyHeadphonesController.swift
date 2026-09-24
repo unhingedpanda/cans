@@ -27,6 +27,10 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     @Published private(set) var retrySecondsRemaining: Int?
     @Published private(set) var lastSyncDate: Date?
     @Published private(set) var lastErrorMessage: String?
+    /// The link is open but the headphones stopped answering (seen once on an XM4 whose firmware
+    /// hung mid NC-optimizer, then rebooted). Cleared by the next frame they send.
+    @Published private(set) var isUnresponsive = false
+    private var missedReplies = 0
 
     var isReady: Bool { linkState == .ready }
     var protocolDescription: String {
@@ -38,7 +42,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         case .disconnected: "Headphones disconnected"
         case .opening: "Opening Sony control link…"
         case .handshaking: "Syncing controls…"
-        case .ready: "Connected"
+        case .ready: isUnresponsive ? "Headphones not responding" : "Connected"
         case .controlBusy: "Control link busy"
         case .failed(let message): message
         }
@@ -425,6 +429,8 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     }
 
     private func beginHandshake() {
+        missedReplies = 0
+        isUnresponsive = false
         sequence = 0
         outbox.removeAll()
         awaitingReply = false
@@ -471,7 +477,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
                 Self.logger.debug(">> \(String(format: "%02X", type), privacy: .public) \(payload.map { String(format: "%02X", $0) }.joined(separator: " "), privacy: .public)")
                 write(payload, type: type, sequence: sequence)
                 let timeout = DispatchWorkItem { [weak self] in
-                    Task { @MainActor in self?.replyReceived() }
+                    Task { @MainActor in self?.replyTimedOut() }
                 }
                 ackTimeoutWorkItem?.cancel()
                 ackTimeoutWorkItem = timeout
@@ -479,6 +485,14 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: timeout)
             }
         }
+    }
+
+    /// Every frame is ACKed, so three silent requests in a row means the headphones stopped listening.
+    private func replyTimedOut() {
+        guard awaitingReply else { return }
+        missedReplies += 1
+        if missedReplies >= 3, stage == .ready, !isUnresponsive { isUnresponsive = true }
+        replyReceived()
     }
 
     private func replyReceived() {
@@ -500,6 +514,8 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
 
     private func receive(_ data: Data) {
         for frame in stream.append(data) {
+            missedReplies = 0
+            if isUnresponsive { isUnresponsive = false }
             Self.logger.debug("<< \(String(format: "%02X", frame.type), privacy: .public) \(frame.payload.map { String(format: "%02X", $0) }.joined(separator: " "), privacy: .public)")
             if frame.type == 0x01 {
                 // The ACK carries the sequence number the headphones expect next. Following it (not
