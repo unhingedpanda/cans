@@ -14,6 +14,29 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     private let popover: NSPopover
     private var cancellables = Set<AnyCancellable>()
     private var pendingStatusPresentation: StatusPresentation?
+    private var litSegments = 0
+
+    /// The Cans menu bar mark: two cups under a three-segment meter band. Lit segments show the
+    /// mode in one colour (off 0, ambient 2, noise cancelling 3), as the menu bar is template-only.
+    private static func glyph(lit: Int) -> NSImage {
+        let image = NSImage(size: NSSize(width: 18, height: 18), flipped: true) { _ in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: NSRect(x: 1.75, y: 9, width: 3.5, height: 6), xRadius: 1.6, yRadius: 1.6).fill()
+            NSBezierPath(roundedRect: NSRect(x: 12.75, y: 9, width: 3.5, height: 6), xRadius: 1.6, yRadius: 1.6).fill()
+            for segment in 0..<3 {
+                let start = 180 + CGFloat(segment) * 60 + 11
+                let band = NSBezierPath()
+                band.appendArc(withCenter: NSPoint(x: 9, y: 10), radius: 6, startAngle: start, endAngle: start + 38)
+                band.lineWidth = 1.7
+                band.lineCapStyle = .round
+                NSColor.black.withAlphaComponent(segment < lit ? 1 : 0.35).setStroke()
+                band.stroke()
+            }
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
 
     init(environment: AppEnvironment) {
         self.environment = environment
@@ -36,9 +59,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         )
 
         guard let button = statusItem.button else { return }
-        let image = NSImage(systemSymbolName: "headphones", accessibilityDescription: nil)
-        image?.isTemplate = true
-        button.image = image
+        button.image = Self.glyph(lit: 0)
         button.setAccessibilityLabel(String(localized: "status.accessibilityLabel"))
         button.target = self
         button.action = #selector(togglePopover(_:))
@@ -68,6 +89,16 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
             }
         } else {
             title = ""
+        }
+        let lit: Int
+        switch headphones.isReady ? headphones.noiseControlMode : nil {
+        case .anc: lit = 3
+        case .ambient: lit = 2
+        default: lit = 0
+        }
+        if lit != litSegments {
+            litSegments = lit
+            button.image = Self.glyph(lit: lit)
         }
         let details = [
             headphones.statusText,
