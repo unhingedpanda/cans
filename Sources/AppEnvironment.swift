@@ -18,9 +18,23 @@ final class AppEnvironment {
             .store(in: &cancellables)
     }
 
+    /// True when unit-test bundles are injected into this process. An app merely launched by UI
+    /// tests is not a test host: it must connect for real, so only injection markers count.
+    static var isTestHost: Bool {
+        let env = ProcessInfo.processInfo.environment
+        return ["XCInjectBundleInto", "XCTestBundleInjectPath", "XCTestBundlePath"].contains { env[$0] != nil }
+    }
+
     static func live() -> AppEnvironment {
+        if isTestHost {
+            // Unit-test host: never take the real RFCOMM channel from a running copy.
+            return AppEnvironment(
+                settings: SettingsStore(defaults: UserDefaults(suiteName: "app.cans.mac.tests") ?? .standard),
+                headphones: SonyHeadphonesController(startAutomatically: false)
+            )
+        }
         if CommandLine.arguments.contains("-ui-testing") {
-            let suiteName = "local.xm5control.ui-testing"
+            let suiteName = "app.cans.mac.ui-testing"
             let defaults = UserDefaults(suiteName: suiteName) ?? .standard
             defaults.removePersistentDomain(forName: suiteName)
             return AppEnvironment(

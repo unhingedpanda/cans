@@ -1,0 +1,218 @@
+{
+  "title": "Cans \u2014 choose the visual world",
+  "question": "The roll assigned Channel Strip for the Cans menu-bar popover. Keep it, take an alternate, steer, or re-roll. Tell me in steer if anything must stay (e.g. dark only, the headphone photo).",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Channel Strip",
+      "kicker": "THE ROLL",
+      "lineage": "Analog mixing-console channel strips (SSL / Neve / Mackie)",
+      "thesis": "Your headphones as one live channel on a desk: mode is the input switch, ambient is the fader.",
+      "palette": [
+        "#17181A",
+        "#2A2C2F",
+        "#ECE9E1",
+        "#F2A33A",
+        "#46D07A"
+      ],
+      "materials": [
+        "anodized charcoal panel",
+        "backlit legend push-buttons",
+        "segmented LED ladders",
+        "scribble-strip label"
+      ],
+      "viewport": "A single vertical strip: scribble strip with name, codec and battery ladder on top; lit Off / NC / Ambient push-buttons; a long ambient fader with 20 detents and Focus on Voice as a latch; EQ as six mini faders; deeper settings slide in as an insert rack.",
+      "risk": "Turns into costume skeuomorphism if bevels, screws or fake metal creep in; it has to stay flat, crisp and native.",
+      "raised": [
+        {
+          "from": "challenger-star-atlas",
+          "raise": "One level ramp everywhere: battery, ambient, volume and pressure all read as the same segmented LED ladder, never mixed gauges."
+        },
+        {
+          "from": "challenger-cutting-bench",
+          "raise": "State is a mark, not just a hue: every lit button also changes its legend and shape, so colour is never the only signal."
+        },
+        {
+          "from": "challenger-arcade",
+          "raise": "One colour by law: signal green means a live control link and nothing else; amber is the only accent for 'on'."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Front Panel",
+      "kicker": "IMPECCABLE\u2019S PICK",
+      "lineage": "1980s Sony ES / Technics hi-fi separates",
+      "thesis": "A brushed-aluminium amplifier faceplate: a detented selector knob, one amber meter, engraved legends.",
+      "palette": [
+        "#C9CBCC",
+        "#8E9195",
+        "#1A1A1A",
+        "#F2A33A"
+      ],
+      "materials": [
+        "brushed aluminium",
+        "engraved legends",
+        "amber backlit meter"
+      ],
+      "viewport": "A faceplate popover: rotary selector for Off / NC / Ambient, an amber needle meter for ambient level, engraved labels, settings behind a hinged lower panel.",
+      "risk": "The most familiar audiophile move, and light aluminium clashes with a dark menu bar."
+    },
+    {
+      "id": "challenger-cyclorama",
+      "label": "Cyclorama Dawn",
+      "verdict": "competitive",
+      "lineage": "Theatre lighting: a cyclorama passing from night to day",
+      "thesis": "Noise control as light: NC is night, Ambient is day, and the horizon band shows how much of the world you let in.",
+      "palette": [
+        "#050608",
+        "#1E3A8A",
+        "#E8A0B4",
+        "#F6F2EA"
+      ],
+      "materials": [
+        "depthless black cyc",
+        "cobalt horizon band",
+        "stencil cue labels"
+      ],
+      "viewport": "The popover's backdrop is the horizon: dragging ambient 1\u219220 raises dawn; cue-sheet labels for scenes.",
+      "case": "Fuses cleanly (ambient level maps to dawn) and holds clarity, but loses on audience identification: theatre lighting isn't a headphone owner's world.",
+      "risk": "Leans on gradients, and mode could read as colour alone.",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp"
+    },
+    {
+      "id": "challenger-star-atlas",
+      "label": "Star Atlas",
+      "verdict": "declined",
+      "lineage": "Celestial star charts",
+      "thesis": "Settings as magnitudes on a chart.",
+      "palette": [
+        "#0E1A33",
+        "#F4F1E8",
+        "#D9534F"
+      ],
+      "materials": [
+        "navy chart ground",
+        "chalk dots"
+      ],
+      "viewport": "Controls plotted as stars.",
+      "case": "Fuses poorly: a control panel is not a sky map.",
+      "risk": "Obscures the task.",
+      "kept": "One fixed ramp carries hierarchy (the LED ladder everywhere).",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-star-atlas-hero.webp"
+    },
+    {
+      "id": "challenger-cutting-bench",
+      "label": "Cutting Bench",
+      "verdict": "declined",
+      "lineage": "Film editing bench select rail",
+      "thesis": "Settings as frames on a rail.",
+      "palette": [
+        "#0A0A0A",
+        "#F26B1D",
+        "#FFFFFF"
+      ],
+      "materials": [
+        "film grain",
+        "tape flags"
+      ],
+      "viewport": "Perforated rail of settings.",
+      "case": "Fuses poorly: nothing here is sequential.",
+      "risk": "Forces a timeline onto toggles.",
+      "kept": "State as a mark, not a hue.",
+      "hero": "https://impeccable.style/worlds/cards/operate-a-cutting-bench-select-rail-hero.webp"
+    },
+    {
+      "id": "challenger-arcade",
+      "label": "Arcade CRT",
+      "verdict": "declined",
+      "lineage": "Pixel-art arcade cabinets",
+      "thesis": "Pixel sprites and phosphor glow.",
+      "palette": [
+        "#000000",
+        "#FFD23F",
+        "#EE4266",
+        "#3BCEAC"
+      ],
+      "materials": [
+        "scanlines",
+        "pixel caps"
+      ],
+      "viewport": "Tile-grid popover.",
+      "case": "Fuses poorly: a novelty for a daily tool.",
+      "risk": "Tires after a week.",
+      "kept": "Palette law: one colour reserved for one meaning.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow-hero.webp"
+    },
+    {
+      "id": "challenger-cloud-quarry",
+      "label": "Cloud Quarry",
+      "verdict": "declined",
+      "lineage": "Surreal weather architecture",
+      "thesis": "Cutting blocks of weather.",
+      "palette": [
+        "#F5F7FA",
+        "#7FB3E6",
+        "#6B7280"
+      ],
+      "materials": [
+        "cumulus",
+        "silver saw line"
+      ],
+      "viewport": "Stacked cloud blocks.",
+      "case": "Fuses poorly: no audience link.",
+      "risk": "Heavy rendering for a tiny utility.",
+      "kept": "A single active edge line marks the control being changed.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-cloud-quarry-hero.webp"
+    },
+    {
+      "id": "challenger-eboy",
+      "label": "Pixorama City",
+      "verdict": "declined",
+      "lineage": "eBoy isometric pixel cities",
+      "thesis": "A zoomable pixel city.",
+      "palette": [
+        "#FF2D2D",
+        "#00C2FF",
+        "#FFE600"
+      ],
+      "materials": [
+        "hard pixels",
+        "isometric blocks"
+      ],
+      "viewport": "Isometric settings blocks.",
+      "case": "Fuses poorly: noise for a glance tool.",
+      "risk": "Distracting.",
+      "kept": "One hard grid shared by every element.",
+      "hero": "https://impeccable.style/worlds/cards/eboy-pixorama-metropolis-hero.webp"
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "buildPath": {
+    "value": "code"
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A macOS Control Center module: system material, SF Symbols, stock toggles, executed impeccably.",
+    "palette": [
+      "#ECECEC",
+      "#1D1D1F",
+      "#0A84FF"
+    ],
+    "materials": [
+      "vibrancy material",
+      "SF Symbols",
+      "system controls"
+    ],
+    "viewport": "Control Center-style tiles for modes, system slider for ambient, a list of settings.",
+    "risk": "Indistinguishable from every other menu bar utility by design."
+  },
+  "steer": true,
+  "seedKey": "5e415ab7"
+}

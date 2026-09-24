@@ -100,7 +100,6 @@ struct EqualizerSettings: Codable, Equatable, Sendable {
     init?(sonyPayload: [UInt8]) {
         guard sonyPayload.count >= 10,
               sonyPayload[1] == 0x00,
-              sonyPayload[2] == EqualizerPreset.manual.rawValue,
               sonyPayload[3] >= 0x06 else { return nil }
         self.init(
             clearBass: Int(sonyPayload[4]) - 10,

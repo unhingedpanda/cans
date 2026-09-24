@@ -1,6 +1,9 @@
-.DS_Store
-DerivedData/
-work/
-*.xcuserstate
-xcuserdata/
 
+.DS_Store
+*.xcuserstate
+build/
+DerivedData/
+release/
+work/
+xcuserdata/
+Configuration/Local.xcconfig

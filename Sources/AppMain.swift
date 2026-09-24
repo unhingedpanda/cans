@@ -2,21 +2,11 @@ import SwiftUI
 
 @main
 @MainActor
-struct XM5ControlApp: App {
+struct CansApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
+    // Everything lives in the menu bar popover; the scene exists only because App requires one.
     var body: some Scene {
-        #if WINDOW_APP || HYBRID_APP
-        WindowGroup {
-            RootView()
-                .environmentObject(appDelegate.environment.settings)
-        }
-        #endif
-
-        Settings {
-            SettingsView()
-                .environmentObject(appDelegate.environment.settings)
-                .environmentObject(appDelegate.environment.headphones)
-        }
+        Settings { EmptyView() }
     }
 }

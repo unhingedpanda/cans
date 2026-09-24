@@ -32,6 +32,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
             })
                 .environmentObject(environment.settings)
                 .environmentObject(environment.headphones)
+                .environmentObject(environment.headphones.deviceSettings)
         )
 
         guard let button = statusItem.button else { return }
@@ -77,7 +78,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         .joined(separator: ", ")
         let presentation = StatusPresentation(
             title: title,
-            accessibilityLabel: "XM5 Control, \(details)"
+            accessibilityLabel: "Cans, \(details)"
         )
 
         // Keep the status item's width fixed while its popover is anchored to it.

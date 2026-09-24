@@ -1,0 +1,7 @@
+// Shared Debug settings. Ad-hoc by default; a machine-local, gitignored Local.xcconfig can pin a
+// stable signing identity so macOS keeps the Bluetooth permission across rebuilds.
+CODE_SIGN_IDENTITY = -
+#include? "Local.xcconfig"
+// Library validation (part of the hardened runtime) rejects the debug dylib and injected test
+// bundles when signed by a local identity with no team ID; the hardened runtime is Release-only.
+ENABLE_HARDENED_RUNTIME = NO

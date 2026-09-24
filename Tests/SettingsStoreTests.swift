@@ -1,11 +1,11 @@
 import Foundation
 import XCTest
-@testable import XM5Control
+@testable import Cans
 
 final class SettingsStoreTests: XCTestCase {
     @MainActor
     func testDefaultsAndPersistence() {
-        let suiteName = "local.xm5control.tests.\(UUID().uuidString)"
+        let suiteName = "app.cans.mac.tests.\(UUID().uuidString)"
         guard let defaults = UserDefaults(suiteName: suiteName) else {
             return XCTFail("Could not create isolated defaults")
         }

@@ -1,0 +1,107 @@
+# project.yml — `xcodegen` regenerates Cans.xcodeproj from this file.
+name: Cans
+options:
+  bundleIdPrefix: app.cans
+  deploymentTarget:
+    macOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "0.2.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Cans:
+    type: application
+    platform: macOS
+    configFiles:
+      Debug: Configuration/Debug.xcconfig
+    sources: [Sources, Resources]
+    info:
+      path: Configuration/Info.plist
+      properties:
+        CFBundleDisplayName: Cans
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        LSMinimumSystemVersion: "14.0"
+        NSBluetoothAlwaysUsageDescription: Cans uses Bluetooth to read and change your Sony headphone settings.
+        NSHumanReadableCopyright: "MIT License. Based on XM5 Control by Maadlou."
+    # Not sandboxed: distributed outside the App Store, and reading the system Now Playing
+    # needs Apple's perl host (see NowPlayingHelper), which the sandbox would block.
+    dependencies:
+      - target: CansNowPlaying
+        link: false  # only perl loads it; Cans itself never links it
+        embed: true
+        copy:
+          destination: frameworks
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.cans.mac
+        PRODUCT_MODULE_NAME: Cans
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Manual
+        DEAD_CODE_STRIPPING: YES
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG MENU_BAR_APP
+        Release:
+          # Ad-hoc until a Developer ID exists; scripts/release.sh signs the same way.
+          CODE_SIGN_IDENTITY: "-"
+          ENABLE_HARDENED_RUNTIME: YES
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: MENU_BAR_APP
+          SWIFT_COMPILATION_MODE: wholemodule
+  CansNowPlaying:
+    type: library.dynamic
+    platform: macOS
+    sources: [NowPlayingHelper]
+    dependencies:
+      - sdk: Foundation.framework
+    settings:
+      base:
+        PRODUCT_NAME: CansNowPlaying
+        EXECUTABLE_PREFIX: lib
+        CLANG_ENABLE_OBJC_ARC: YES
+        SKIP_INSTALL: YES
+  CansTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Tests]
+    dependencies:
+      - target: Cans
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_MODULE_NAME: CansTests
+  CansHardwareTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [HardwareTests]
+    dependencies:
+      - target: Cans
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_MODULE_NAME: CansHardwareTests
+  CansUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources: [UITests]
+    dependencies:
+      - target: Cans
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_MODULE_NAME: CansUITests
+schemes:
+  Cans:
+    build:
+      targets: { Cans: all }
+    test:
+      targets: [CansTests, CansUITests]
+  Cans E2E:
+    build:
+      targets: { Cans: all }
+    test:
+      targets: [CansTests, CansHardwareTests, CansUITests]

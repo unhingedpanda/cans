@@ -1,1071 +1,865 @@
 import AppKit
 import SwiftUI
 
-private enum ListeningPreset: String, CaseIterable, Identifiable {
-    case focus, office, aware
+/// Ambient recalls. (Noise cancelling has its own NC key, so no scene duplicates it.)
+private enum Scene: String, CaseIterable, Identifiable {
+    case office, aware
 
+    var id: Self { self }
+    var title: String { rawValue }
+    var level: Int { self == .office ? 8 : 20 }
+    var focusOnVoice: Bool { self == .office }
+    var help: String { self == .office ? "Ambient 8 with Focus on Voice" : "Ambient 20, full awareness" }
+}
+
+private enum PanelScreen { case dashboard, inserts }
+
+private enum InsertSection: String, CaseIterable, Identifiable {
+    case headphones, speakToChat, noiseCancelling, sound, controls, app, diagnostics
     var id: Self { self }
     var title: String {
         switch self {
-        case .focus: "Focus"
-        case .office: "Office"
-        case .aware: "Aware"
+        case .headphones: "Headphones"
+        case .speakToChat: "Speak-to-Chat"
+        case .noiseCancelling: "NC Optimizer"
+        case .sound: "Sound"
+        case .controls: "Controls"
+        case .app: "App"
+        case .diagnostics: "Diagnostics"
+        }
+    }
+    var summary: String {
+        switch self {
+        case .headphones: "What's connected, straight from the headphones."
+        case .speakToChat: "Talk to someone without taking your headphones off."
+        case .noiseCancelling: "Fit noise cancelling to you and the air around you."
+        case .sound: "Upscaling and how Bluetooth trades quality for stability."
+        case .controls: "Buttons, touch, sensors and power."
+        case .app: "How Cans behaves on this Mac."
+        case .diagnostics: "The control link, for troubleshooting."
         }
     }
     var symbol: String {
         switch self {
-        case .focus: "moon.stars.fill"
-        case .office: "person.2.fill"
-        case .aware: "figure.walk"
+        case .headphones: "headphones"
+        case .speakToChat: "bubble.left.and.bubble.right"
+        case .noiseCancelling: "waveform.path.ecg"
+        case .sound: "hifispeaker"
+        case .controls: "hand.tap"
+        case .app: "menubar.rectangle"
+        case .diagnostics: "stethoscope"
         }
     }
-    var mode: NoiseControlMode { self == .focus ? .anc : .ambient }
-    var level: Int {
-        switch self {
-        case .focus: 10
-        case .office: 8
-        case .aware: 20
-        }
-    }
-    var focusOnVoice: Bool { self == .office }
-}
-
-private enum XM5Palette {
-    static let canvas = Color(red: 0.115, green: 0.115, blue: 0.112)
-    static let raised = Color(red: 0.15, green: 0.15, blue: 0.145)
-    static let soft = Color.white.opacity(0.055)
-    static let line = Color.white.opacity(0.14)
-    static let ink = Color(red: 0.94, green: 0.93, blue: 0.90)
-    static let muted = Color(red: 0.59, green: 0.59, blue: 0.57)
-    static let accent = Color(red: 0.82, green: 0.67, blue: 0.43)
-    static let success = Color(red: 0.43, green: 0.72, blue: 0.57)
-}
-
-private enum PanelScreen {
-    case dashboard
-    case settings
 }
 
 enum MenuBarMetrics {
-    static let displaySize = CGSize(width: 344, height: 606)
-    static let contentInset: CGFloat = 18
-}
-
-private struct NoiseControlGlyph: Shape {
-    let mode: NoiseControlMode
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-
-        switch mode {
-        case .off:
-            path.addEllipse(in: CGRect(x: 2, y: 2, width: 20, height: 20))
-        case .anc:
-            addLine(to: &path, from: CGPoint(x: 10, y: 10), to: CGPoint(x: 10, y: 21))
-            addLine(to: &path, from: CGPoint(x: 10, y: 3), to: CGPoint(x: 10, y: 4.35))
-            addLine(to: &path, from: CGPoint(x: 14, y: 14), to: CGPoint(x: 14, y: 15))
-            addLine(to: &path, from: CGPoint(x: 14, y: 8), to: CGPoint(x: 14, y: 8.35))
-            addLine(to: &path, from: CGPoint(x: 18, y: 5), to: CGPoint(x: 18, y: 12.35))
-            addLine(to: &path, from: CGPoint(x: 2, y: 10), to: CGPoint(x: 2, y: 13))
-            addLine(to: &path, from: CGPoint(x: 2, y: 2), to: CGPoint(x: 22, y: 22))
-            addLine(to: &path, from: CGPoint(x: 22, y: 10), to: CGPoint(x: 22, y: 13))
-            addLine(to: &path, from: CGPoint(x: 6, y: 6), to: CGPoint(x: 6, y: 17))
-        case .ambient, .wind:
-            path.move(to: CGPoint(x: 2, y: 16))
-            path.addLine(to: CGPoint(x: 14, y: 16))
-            path.addCurve(
-                to: CGPoint(x: 12.8, y: 19.6),
-                control1: CGPoint(x: 16.65, y: 16),
-                control2: CGPoint(x: 15.65, y: 20.85)
-            )
-
-            path.move(to: CGPoint(x: 2, y: 12))
-            path.addLine(to: CGPoint(x: 19.5, y: 12))
-            path.addCurve(
-                to: CGPoint(x: 17.5, y: 8),
-                control1: CGPoint(x: 22.8, y: 12),
-                control2: CGPoint(x: 21.35, y: 6.35)
-            )
-
-            path.move(to: CGPoint(x: 2, y: 8))
-            path.addLine(to: CGPoint(x: 11, y: 8))
-            path.addCurve(
-                to: CGPoint(x: 9.8, y: 4.4),
-                control1: CGPoint(x: 13.65, y: 8),
-                control2: CGPoint(x: 12.65, y: 3.15)
-            )
-        }
-
-        let scale = min(rect.width, rect.height) / 24
-        let xOffset = rect.midX - (12 * scale)
-        let yOffset = rect.midY - (12 * scale)
-        return path.applying(
-            CGAffineTransform(a: scale, b: 0, c: 0, d: scale, tx: xOffset, ty: yOffset)
-        )
-    }
-
-    private func addLine(to path: inout Path, from start: CGPoint, to end: CGPoint) {
-        path.move(to: start)
-        path.addLine(to: end)
-    }
-}
-
-private struct CircularModeButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .opacity(configuration.isPressed ? 0.72 : 1)
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-    }
-}
-
-private struct HeaderActionButton: View {
-    let symbol: String
-    let label: String
-    let action: () -> Void
-    @State private var isHovering = false
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 11, weight: .semibold))
-                .frame(width: 30, height: 30)
-                .foregroundStyle(isHovering ? XM5Palette.ink : XM5Palette.muted)
-                .background(XM5Palette.soft.opacity(isHovering ? 2 : 1), in: Circle())
-                .overlay(Circle().stroke(XM5Palette.line, lineWidth: 0.75))
-                .contentShape(Circle())
-        }
-        .buttonStyle(CircularModeButtonStyle())
-        .onContinuousHover { isHovering = $0 != .ended }
-        .help(label)
-        .accessibilityLabel(label)
-    }
-}
-
-private struct SceneButton: View {
-    let preset: ListeningPreset
-    let selected: Bool
-    let action: () -> Void
-    @State private var isHovering = false
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 5) {
-                Image(systemName: preset.symbol)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(XM5Palette.accent)
-                Text(preset.title)
-                    .font(.system(size: 12, weight: .medium))
-            }
-            .foregroundStyle(XM5Palette.ink)
-            .frame(maxWidth: .infinity)
-            .frame(height: 50)
-            .background(
-                selected ? XM5Palette.accent.opacity(0.12) : XM5Palette.soft.opacity(isHovering ? 2 : 1),
-                in: RoundedRectangle(cornerRadius: 9)
-            )
-            .overlay(RoundedRectangle(cornerRadius: 9).stroke(selected ? XM5Palette.accent.opacity(0.55) : XM5Palette.line, lineWidth: 0.75))
-            .contentShape(RoundedRectangle(cornerRadius: 9))
-        }
-        .buttonStyle(CircularModeButtonStyle())
-        .onContinuousHover { isHovering = $0 != .ended }
-    }
-}
-
-private struct ListeningModeButton: View {
-    let mode: NoiseControlMode
-    let selected: Bool
-    let enabled: Bool
-    let action: () -> Void
-    @State private var isHovering = false
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 5) {
-                ZStack {
-                    Circle()
-                        .fill(selected ? XM5Palette.accent : (isHovering ? XM5Palette.soft : XM5Palette.raised))
-                    Circle()
-                        .stroke(selected ? XM5Palette.accent : XM5Palette.line, lineWidth: 1)
-                    NoiseControlGlyph(mode: mode)
-                        .stroke(
-                            selected ? XM5Palette.canvas : (isHovering ? XM5Palette.ink : XM5Palette.muted),
-                            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)
-                        )
-                        .frame(width: 24, height: 24)
-                }
-                .frame(width: 52, height: 52)
-                .shadow(color: selected ? XM5Palette.accent.opacity(0.18) : .clear, radius: 8, y: 3)
-
-                Text(mode.compactTitle)
-                    .font(.system(size: 12, weight: .medium))
-                    .lineLimit(1)
-                    .foregroundStyle(selected ? XM5Palette.accent : (isHovering ? XM5Palette.ink : XM5Palette.muted))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 76)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(CircularModeButtonStyle())
-        .disabled(!enabled)
-        .opacity(enabled ? 1 : 0.42)
-        .onContinuousHover { isHovering = enabled && $0 != .ended }
-        .accessibilityIdentifier("noiseControl.\(mode.rawValue)")
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-}
-
-private struct AmbientLevelTrack: View {
-    let level: Int
-    let onChange: (Int) -> Void
-    @State private var isHovering = false
-
-    private var progress: CGFloat {
-        CGFloat(level - 1) / 19
-    }
-
-    var body: some View {
-        GeometryReader { proxy in
-            let thumbSize: CGFloat = 16
-            let trackWidth = max(1, proxy.size.width - thumbSize)
-
-            ZStack(alignment: .topLeading) {
-                Capsule()
-                    .fill(XM5Palette.line)
-                    .frame(width: trackWidth, height: 4)
-                    .offset(x: thumbSize / 2, y: 5)
-
-                Capsule()
-                    .fill(XM5Palette.accent)
-                    .frame(width: max(4, trackWidth * progress), height: 4)
-                    .offset(x: thumbSize / 2, y: 5)
-
-                Circle()
-                    .fill(XM5Palette.ink)
-                    .frame(width: thumbSize, height: thumbSize)
-                    .overlay(Circle().stroke(Color.white.opacity(0.22), lineWidth: 1))
-                    .shadow(color: .black.opacity(0.42), radius: isHovering ? 5 : 3, y: 2)
-                    .offset(x: trackWidth * progress)
-            }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { gesture in
-                        let normalized = min(1, max(0, (gesture.location.x - thumbSize / 2) / trackWidth))
-                        let newLevel = Int((normalized * 19).rounded()) + 1
-                        if newLevel != level { onChange(newLevel) }
-                    }
-            )
-            .onContinuousHover { phase in
-                isHovering = phase != .ended
-            }
-        }
-        .frame(height: 18)
-        .accessibilityElement()
-        .accessibilityLabel("Ambient sound level")
-        .accessibilityValue("\(level) of 20")
-        .accessibilityAdjustableAction { direction in
-            switch direction {
-            case .increment: onChange(min(20, level + 1))
-            case .decrement: onChange(max(1, level - 1))
-            @unknown default: break
-            }
-        }
-    }
-}
-
-private struct PassiveNoiseField: View {
-    let mode: NoiseControlMode?
-
-    var body: some View {
-        ZStack {
-            if mode == .anc {
-                HStack(alignment: .center, spacing: 3) {
-                    ForEach(0..<29, id: \.self) { index in
-                        let distance = abs(CGFloat(index) - 14) / 14
-                        Capsule()
-                            .fill(XM5Palette.muted.opacity(0.18 + (distance * 0.38)))
-                            .frame(width: 2, height: 3 + (distance * distance * 29))
-                    }
-                }
-                .mask(
-                    LinearGradient(
-                        colors: [.clear, .white, .white, .clear],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-
-                Circle()
-                    .fill(XM5Palette.accent)
-                    .frame(width: 4, height: 4)
-                    .shadow(color: XM5Palette.accent.opacity(0.55), radius: 5)
-            } else {
-                Capsule()
-                    .fill(XM5Palette.line)
-                    .frame(width: 142, height: 1)
-
-                ZStack {
-                    Circle().fill(XM5Palette.canvas)
-                    NoiseControlGlyph(mode: mode == .wind ? .ambient : .off)
-                        .stroke(
-                            XM5Palette.muted.opacity(0.62),
-                            style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)
-                        )
-                        .frame(width: 18, height: 18)
-                }
-                .frame(width: 30, height: 30)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 96)
-        .accessibilityElement()
-        .accessibilityLabel(accessibilityDescription)
-    }
-
-    private var accessibilityDescription: String {
-        switch mode {
-        case .anc: "Noise cancellation on"
-        case .off: "Noise control off"
-        case .wind: "Wind reduction on"
-        case .ambient: "Ambient sound on"
-        case nil: "Headphone controls unavailable"
-        }
-    }
+    static let width: CGFloat = 660
+    static let insertsHeight: CGFloat = 420
+    static let displaySize = CGSize(width: width, height: 470)
+    static let inset: CGFloat = 20
 }
 
 struct MenuBarView: View {
     var onSizeChange: ((CGSize) -> Void)? = nil
     @EnvironmentObject private var headphones: SonyHeadphonesController
+    @EnvironmentObject private var device: SonyDeviceSettings
     @EnvironmentObject private var settings: SettingsStore
+    @StateObject private var nowPlaying = NowPlaying()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var showingEqualizerEditor = false
     @State private var screen: PanelScreen = .dashboard
+    @State private var contentHeight: CGFloat = 330
+    @State private var section: InsertSection = CommandLine.arguments
+        .first { $0.hasPrefix("--section=") }
+        .flatMap { InsertSection(rawValue: String($0.dropFirst("--section=".count))) } ?? .headphones
+    @State private var savingProfile = false
+    @State private var profileName = ""
+    @State private var confirmingMultipoint = false
+    @State private var powerOffArmed = false
+    @State private var celebratingFullCharge = false
 
-    private var panelSize: CGSize {
-        CGSize(width: MenuBarMetrics.displaySize.width,
-               height: screen == .dashboard && !headphones.isReady ? 420 : MenuBarMetrics.displaySize.height)
+    private var panelHeight: CGFloat {
+        // Inserts matches the dashboard so the popover never jumps size between screens.
+        screen == .inserts ? max(contentHeight, MenuBarMetrics.insertsHeight) : contentHeight
     }
 
     var body: some View {
-        ZStack {
-            background
+        ZStack(alignment: .top) {
+            Console.panel.ignoresSafeArea()
             if screen == .dashboard {
                 dashboard
-                    .transition(panelTransition(edge: .leading))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+                    .transition(slide(.leading))
             } else {
-                settingsPanel
-                    .transition(panelTransition(edge: .trailing))
+                inserts.transition(slide(.trailing))
             }
         }
-        .frame(
-            width: MenuBarMetrics.displaySize.width,
-            height: panelSize.height,
-            alignment: .top
-        )
+        .frame(width: MenuBarMetrics.width, height: panelHeight, alignment: .top)
         .clipped()
-        .onChange(of: panelSize, initial: true) { _, size in
-            onSizeChange?(size)
+        .onChange(of: panelHeight, initial: true) { _, height in
+            onSizeChange?(CGSize(width: MenuBarMetrics.width, height: height))
         }
-        .preferredColorScheme(.dark)
-        .sheet(isPresented: $showingEqualizerEditor) {
-            EqualizerEditorView()
-                .environmentObject(headphones)
-                .environmentObject(settings)
-                .preferredColorScheme(.dark)
+        .tint(Console.amber)
+        .alert("Save EQ as", isPresented: $savingProfile) {
+            TextField("Name", text: $profileName)
+            Button("Save") {
+                settings.customEqualizerDraft = headphones.customEqualizer
+                settings.saveEqualizerProfile(named: profileName)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Saved on this Mac. Choosing it later sends the curve to your headphones.")
+        }
+        .alert("Turn multipoint \(device.multipoint == true ? "off" : "on")?", isPresented: $confirmingMultipoint) {
+            Button("Change") { device.setMultipoint(!(device.multipoint ?? false)) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Your headphones may restart and briefly disconnect. With multipoint on, LDAC is unavailable.")
+        }
+        // .contain keeps this container's identifier from overriding every child's identifier.
+        .accessibilityElement(children: .contain)
+        .onReceive(NotificationCenter.default.publisher(for: NSPopover.willShowNotification)) { _ in nowPlaying.start() }
+        .onReceive(NotificationCenter.default.publisher(for: NSPopover.didCloseNotification)) { _ in nowPlaying.stop() }
+        .onAppear {
+            if CommandLine.arguments.contains("--ui-test-host") { nowPlaying.start() }
+            #if DEBUG
+            // Capture aids: --demo-mode=ambient|anc|off switches the headphones once linked;
+            // --show-inserts shows the dashboard first (so its height is measured), then Inserts.
+            if let arg = CommandLine.arguments.first(where: { $0.hasPrefix("--demo-mode=") }) {
+                let mode: NoiseControlMode = arg.hasSuffix("ambient") ? .ambient : arg.hasSuffix("off") ? .off : .anc
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    headphones.applyPreset(mode: mode, ambientLevel: 14, focusOnVoice: false)
+                }
+            }
+            #endif
+        }
+        .onChange(of: headphones.isReady) { _, ready in
+            #if DEBUG
+            // Capture aid: once linked (dashboard measured), open Inserts.
+            if ready, CommandLine.arguments.contains("--show-inserts") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { navigate(to: .inserts) }
+            }
+            #endif
         }
         .accessibilityIdentifier(screen == .dashboard ? "headphones.dashboard" : "settings.inline")
     }
 
+    // MARK: Dashboard
+
     private var dashboard: some View {
         VStack(spacing: 0) {
+            stripHeader
+                .padding(.bottom, 10)
             if headphones.isReady {
-                hero
-                controlDeck
+                // Top deck: the channel on the left, its switches on the right.
+                HStack(alignment: .center, spacing: 0) {
+                    HStack(alignment: .center, spacing: 14) {
+                        ChannelPortrait(modelName: device.modelName ?? headphones.deviceName,
+                                        mode: headphones.noiseControlMode, ambientLevel: headphones.ambientLevel)
+                        meterBridge
+                    }
+                    .frame(width: 300, alignment: .leading)
+                    Rectangle().fill(Console.groove).frame(width: 1).padding(.horizontal, 18)
+                    VStack(alignment: .leading, spacing: 14) {
+                        inputSelector
+                        sceneRecall
+                        if device.isPlaying != nil || nowPlaying.track != nil { transport }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                seam
+                faderBank
             } else {
-                connectionPanel
+                noSignal
             }
         }
-        .padding(.bottom, MenuBarMetrics.contentInset)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.horizontal, MenuBarMetrics.inset)
+        .padding(.top, 14)
+        .padding(.bottom, 16)
     }
 
-    private var isConnecting: Bool {
-        headphones.linkState == .opening || headphones.linkState == .handshaking
+    private var seam: some View {
+        Rectangle().fill(Console.groove).frame(height: 1)
+            .overlay(alignment: .bottom) { Rectangle().fill(Console.seam).frame(height: 1).offset(y: 1) }
+            .padding(.vertical, 10)
     }
 
-    private var connectionTitle: String {
-        switch headphones.linkState {
-        case .opening, .handshaking: "Connecting to your headphones"
-        case .controlBusy: "Audio connected. Controls unavailable."
-        case .failed: "Couldn't connect"
-        default: "Headphones disconnected"
+    private var stripHeader: some View {
+        HStack(spacing: 8) {
+            ScribbleTape(text: headphones.deviceName, size: 13)
+                .help(Self.isSmallHours ? "Still up? Your ears could use a rest." : headphones.deviceName)
+                .accessibilityIdentifier("menu.title")
+            linkLamp
+            Spacer(minLength: 4)
+            Button { navigate(to: .inserts) } label: {
+                Legend("Inserts", size: 10.5, color: Console.legend)
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(Console.raised, in: RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Console.seam, lineWidth: 0.75))
+            }
+            .buttonStyle(PressStyle())
+            .keyboardShortcut(",", modifiers: .command)
+            .accessibilityIdentifier("inserts.open")
+            .help("Headphone and app settings (⌘,)")
+            .accessibilityLabel("Inserts")
         }
     }
 
-    private var connectionGuidance: String {
+    private static var isSmallHours: Bool { (2...4).contains(Calendar.current.component(.hour, from: Date())) }
+
+    private var linkLamp: some View {
+        let live = headphones.isReady
+        return HStack(spacing: 5) {
+            Circle()
+                .fill(live ? Console.signal : Console.unlit)
+                .frame(width: 6, height: 6)
+                .shadow(color: live ? Console.signal.opacity(0.7) : .clear, radius: 4)
+            Legend(live ? "Live" : linkLegend, size: 10.5, color: live ? Console.legend : Console.dim)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(headphones.statusText)
+    }
+
+    private var linkLegend: String {
         switch headphones.linkState {
-        case .opening, .handshaking:
-            "Keep your headphones switched on and nearby."
-        case .controlBusy:
-            "Close Sony Sound Connect on your phone, then try again."
-        case .failed:
-            "Check that your headphones are on and connected in Bluetooth settings, then try again."
-        default:
-            "Turn on your headphones to reconnect. If this is your first time, pair them in Bluetooth settings."
+        case .opening, .handshaking: "Linking"
+        case .controlBusy: "Busy"
+        case .failed: "Fault"
+        default: "Off"
         }
     }
 
-    private var connectionPanel: some View {
-        VStack(spacing: 0) {
-            header
-            Image("XM5Hero")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 128)
-                .shadow(color: .black.opacity(0.25), radius: 16, y: 10)
-                .padding(.top, 16)
-                .padding(.bottom, 16)
-                .accessibilityHidden(true)
-
-            ScrollView {
-                VStack(spacing: 14) {
-                    Text(connectionTitle)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(XM5Palette.ink)
-                    Text(connectionGuidance)
-                        .font(.system(size: 12))
-                        .foregroundStyle(XM5Palette.muted)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .lineSpacing(3)
-                    Button {
-                        if headphones.isDeviceConnected {
-                            headphones.refresh()
-                        } else {
-                            headphones.connect()
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
-                            if isConnecting {
-                                ProgressView().controlSize(.small)
+    private var meterBridge: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(device.modelName ?? "Sony headphones")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Console.legend)
+            Text(headphones.firmwareVersion.map { "Firmware \($0)" } ?? " ")
+                .font(.system(size: 11))
+                .foregroundStyle(Console.dim)
+            if let battery = headphones.batteryLevel {
+                HStack(spacing: 7) {
+                    Legend(headphones.isCharging ? "Chg" : "Batt", size: 10.5)
+                    LEDLadder(fraction: Double(battery) / 100, tint: battery <= 20 ? Console.alarm : Console.amber,
+                              chasing: celebratingFullCharge)
+                        .onChange(of: battery) { old, new in
+                            if new == 100, old < 100, headphones.isCharging {
+                                celebratingFullCharge = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 4) { celebratingFullCharge = false }
                             }
-                            Text(isConnecting ? "Connecting…" : "Connect")
-                                .font(.system(size: 13, weight: .semibold))
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .foregroundStyle(XM5Palette.canvas)
-                        .background(XM5Palette.accent, in: RoundedRectangle(cornerRadius: 10))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isConnecting)
-                    .accessibilityIdentifier("headphones.connect")
+                    Text("\(battery)%")
+                        .font(.system(size: 11, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(battery <= 20 ? Console.alarmInk : Console.legend)
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Battery \(battery) percent\(headphones.isCharging ? ", charging" : "")")
+            }
+            HStack(spacing: 6) {
+                if let codec = device.codec { badge(codec, lit: false, help: "Bluetooth codec in use") }
+                if let dsee = device.dseeActive { badge("DSEE", lit: dsee, help: dsee ? "DSEE Extreme is upscaling" : "DSEE Extreme idle") }
+                if headphones.isApplyingChange {
+                    LEDLadder(fraction: 0, segments: 4, segmentSize: CGSize(width: 4, height: 7), chasing: true)
+                        .accessibilityLabel("Applying setting")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 
-                    Button("Bluetooth settings…") {
-                        if let url = URL(string: "x-apple.systempreferences:com.apple.BluetoothSettings") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 12))
-                    .foregroundStyle(XM5Palette.ink)
-                    .padding(.vertical, 6)
-                    if let seconds = headphones.retrySecondsRemaining {
-                        Text("Retrying in \(seconds)s")
-                            .font(.system(size: 11))
-                            .foregroundStyle(XM5Palette.muted)
+    private func badge(_ text: String, lit: Bool, help: String) -> some View {
+        Legend(text, size: 10.5, color: lit ? Console.amberInk : Console.dim)
+            .padding(.horizontal, 6)
+            .frame(height: 18)
+            .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(lit ? Console.amber.opacity(0.6) : Console.seam, lineWidth: 0.75))
+            .help(help)
+            .accessibilityLabel(help)
+    }
+
+    private var inputSelector: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Legend("Noise control", size: 10.5)
+            HStack(spacing: 6) {
+                modeButton(.off, "Off", key: "1")
+                modeButton(.anc, "NC", key: "2")
+                modeButton(.ambient, "Amb", key: "3")
+            }
+        }
+    }
+
+    private func modeButton(_ mode: NoiseControlMode, _ title: String, key: KeyEquivalent) -> some View {
+        LampButton(title: title, lit: headphones.noiseControlMode == mode, height: 34, fontSize: 12.5) {
+            headphones.setNoiseControl(mode)
+        }
+        .keyboardShortcut(key, modifiers: [])
+        .help("\(mode.title) (\(String(key.character)))")
+        .accessibilityLabel(mode.title)
+        .accessibilityIdentifier("noiseControl.\(mode.rawValue)")
+    }
+
+    private var faderBank: some View {
+        let eq = headphones.customEqualizer
+        let ambientOn = headphones.noiseControlMode == .ambient
+        return VStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 0) {
+                Fader(label: "Ambient sound level", accessibilityName: "Ambient level",
+                      value: max(1, headphones.ambientLevel), range: 1...20, ticks: [1, 5, 10, 15, 20],
+                      enabled: ambientOn, tapeLabel: "Amb") { headphones.setAmbientLevel($0) }
+                Rectangle().fill(Console.groove).frame(width: 1, height: 132).padding(.horizontal, 6)
+                Fader(label: "Clear Bass", accessibilityName: "Clear Bass", value: eq.clearBass, range: -10...10,
+                      ticks: [-10, -5, 0, 5, 10], enabled: eqEnabled, resetValue: 0, format: signed,
+                      tapeLabel: "CB", dimValue: eqOff) {
+                    var next = eq
+                    next.clearBass = $0
+                    headphones.setCustomEqualizer(next)
+                }
+                ForEach(0..<5, id: \.self) { band in
+                    Fader(label: EqualizerSettings.bandLabels[band], accessibilityName: "\(EqualizerSettings.bandLabels[band]) band",
+                          value: eq[band: band], range: -10...10, ticks: [-10, -5, 0, 5, 10],
+                          enabled: eqEnabled, resetValue: 0, format: signed,
+                          tapeLabel: ["400", "1K", "2.5K", "6.3K", "16K"][band], dimValue: eqOff) {
+                        var next = eq
+                        next[band: band] = $0
+                        headphones.setCustomEqualizer(next)
                     }
                 }
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 12)
             }
-            .scrollIndicators(.hidden)
+            .frame(maxWidth: .infinity)
+            // One continuous scribble strip runs under the bank; each fader writes its own label on it.
+            .background(alignment: .bottom) {
+                Console.tape.frame(height: 18).clipShape(RoundedRectangle(cornerRadius: 2))
+                    .overlay(RoundedRectangle(cornerRadius: 2).strokeBorder(Console.tapeEdge, lineWidth: 0.75))
+            }
+
+            HStack(spacing: 6) {
+                LampButton(title: "Voice", lit: ambientOn && headphones.focusOnVoice, enabled: ambientOn, height: 24, fontSize: 10.5) {
+                    headphones.setFocusOnVoice(!headphones.focusOnVoice)
+                }
+                // Exactly one fader column wide, so it sits centred under AMB.
+                .frame(width: (MenuBarMetrics.width - 2 * MenuBarMetrics.inset - 13) / 7)
+                .help("Focus on Voice")
+                .accessibilityLabel("Focus on Voice")
+                .accessibilityValue(headphones.focusOnVoice ? "On" : "Off")
+                Spacer()
+                Legend("EQ", size: 10.5)
+                equalizerMenu
+            }
         }
-        .padding(.horizontal, MenuBarMetrics.contentInset)
-        .padding(.top, MenuBarMetrics.contentInset)
+    }
+
+    private var eqEnabled: Bool { headphones.equalizerPreset != nil }
+    private var eqOff: Bool { headphones.equalizerPreset == .off }
+
+    private func signed(_ value: Int) -> String { value > 0 ? "+\(value)" : "\(value)" }
+
+    private var equalizerMenu: some View {
+        Menu {
+            ForEach(EqualizerPreset.selectableCases) { preset in
+                Button {
+                    headphones.setEqualizerPreset(preset)
+                } label: {
+                    if headphones.equalizerPreset == preset {
+                        Label(preset.title, systemImage: "checkmark")
+                    } else {
+                        Text(preset.title)
+                    }
+                }
+            }
+            if !settings.equalizerProfiles.isEmpty {
+                Divider()
+                ForEach(settings.equalizerProfiles) { profile in
+                    Button(profile.name) {
+                        settings.customEqualizerDraft = profile.settings
+                        headphones.setCustomEqualizer(profile.settings)
+                    }
+                }
+                Menu("Delete Saved") {
+                    ForEach(settings.equalizerProfiles) { profile in
+                        Button(profile.name, role: .destructive) { settings.deleteEqualizerProfile(id: profile.id) }
+                    }
+                }
+            }
+            Divider()
+            Button("Save Current Curve…") {
+                profileName = ""
+                savingProfile = true
+            }
+        } label: {
+            Text((headphones.equalizerPreset?.title ?? "—").uppercased())
+                .font(Console.legendFont(10.5, weight: .bold))
+                .foregroundStyle(eqOff ? Console.dim : Console.amberInk)
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+        .padding(.trailing, -5)  // the borderless indicator carries built-in trailing space; land on the edge
+        .disabled(!eqEnabled)
+        .help("Equalizer preset. Moving a band fader switches to Manual.")
+        .accessibilityLabel("Equalizer preset")
+        .accessibilityValue(headphones.equalizerPreset?.title ?? "Unavailable")
+        .accessibilityIdentifier("equalizer.preset")
+    }
+
+    private var sceneRecall: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Legend("Scene", size: 10.5)
+            HStack(spacing: 6) {
+            ForEach(Scene.allCases) { scene in
+                LampButton(title: scene.title, lit: isSceneActive(scene), height: 26, fontSize: 10.5) {
+                    headphones.applyPreset(mode: .ambient, ambientLevel: scene.level, focusOnVoice: scene.focusOnVoice)
+                }
+                .help(scene.help)
+            }
+            }
+        }
+    }
+
+    private func isSceneActive(_ scene: Scene) -> Bool {
+        guard headphones.noiseControlMode == .ambient else { return false }
+        return headphones.ambientLevel == scene.level && headphones.focusOnVoice == scene.focusOnVoice
+    }
+
+    /// One recessed transport module: source, track and controls on a shared centre line.
+    /// Track info comes from macOS Now Playing (any app); the headphones only know the play state.
+    private var transport: some View {
+        let track = nowPlaying.track
+        let playing = track?.isPlaying ?? (device.isPlaying == true)
+        return HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Legend(track?.appName ?? "Now playing", size: 10)
+                Text(track?.title ?? "Nothing playing")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(track == nil ? Console.dim : Console.legend)
+                    .lineLimit(1)
+                Text(track?.artist ?? " ")
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(Console.dim)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+
+            HStack(spacing: 6) {
+                transportKey("backward.fill", "Previous track") {
+                    track != nil ? nowPlaying.perform("previous") : device.playback(.previous)
+                }
+                Button {
+                    track != nil ? nowPlaying.perform("playpause") : device.playback(playing ? .pause : .play)
+                } label: {
+                    Image(systemName: playing ? "pause.fill" : "play.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(playing ? Console.tapeInk : Console.legend)
+                        .frame(width: 34, height: 34)
+                        .background(Circle().fill(playing ? Console.amber : Console.raised)
+                            .shadow(color: playing ? Console.glow : .black.opacity(0.35), radius: playing ? 6 : 1.5, y: playing ? 0 : 1))
+                        .overlay(Circle().strokeBorder(Console.seam, lineWidth: 0.75))
+                }
+                .buttonStyle(PressStyle())
+                .keyboardShortcut(.space, modifiers: [])
+                .help(playing ? "Pause" : "Play")
+                .accessibilityLabel(playing ? "Pause" : "Play")
+                transportKey("forward.fill", "Next track") {
+                    track != nil ? nowPlaying.perform("next") : device.playback(.next)
+                }
+            }
+        }
+        .padding(.leading, 12)
+        .padding(.trailing, 8)
+        .frame(height: 58)
+        .background(Console.groove.opacity(0.55), in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).strokeBorder(Console.seam, lineWidth: 0.75))
+    }
+
+    private func transportKey(_ symbol: String, _ label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Console.legend)
+                .frame(width: 28, height: 28)
+                .contentShape(Circle())
+        }
+        .buttonStyle(PressStyle())
+        .help(label)
+        .accessibilityLabel(label)
+    }
+
+    private var isLinking: Bool { headphones.linkState == .opening || headphones.linkState == .handshaking }
+
+    private var noSignal: some View {
+        VStack(spacing: 14) {
+            if headphones.address.isEmpty == false {
+                ChannelPortrait(modelName: headphones.deviceName, mode: .off, ambientLevel: 0)
+                    .opacity(0.55)
+            }
+            LEDLadder(fraction: 0, segments: 14, chasing: isLinking)
+                .padding(.top, 24)
+            Text(noSignalTitle)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(Console.legend)
+            Text(noSignalGuidance)
+                .font(.system(size: 11.5))
+                .foregroundStyle(Console.dim)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            if !isLinking {
+                LampButton(title: "Connect", lit: true, height: 34, fontSize: 12) {
+                    headphones.isDeviceConnected ? headphones.refresh() : headphones.connect()
+                }
+                .accessibilityIdentifier("headphones.connect")
+            }
+            HStack {
+                Button("Bluetooth Settings…") {
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.BluetoothSettings") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+                Spacer()
+                if let seconds = headphones.retrySecondsRemaining {
+                    Text("Retrying in \(seconds)s").monospacedDigit()
+                }
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 11))
+            .foregroundStyle(Console.dim)
+        }
+        .frame(maxWidth: 360)
+        .frame(maxWidth: .infinity)
+        .padding(.bottom, 8)
         .accessibilityIdentifier("headphones.connection")
     }
 
-    private func panelTransition(edge: Edge) -> AnyTransition {
-        reduceMotion ? .opacity : .asymmetric(
-            insertion: .move(edge: edge).combined(with: .opacity),
-            removal: .opacity
-        )
-    }
-
-    private var background: some View {
-        ZStack {
-            XM5Palette.canvas
-            RadialGradient(
-                colors: [XM5Palette.accent.opacity(0.075), .clear],
-                center: UnitPoint(x: 0.86, y: 0.08),
-                startRadius: 0,
-                endRadius: 300
-            )
-            LinearGradient(
-                colors: [Color.white.opacity(0.022), .clear, Color.black.opacity(0.10)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        }
-        .ignoresSafeArea()
-    }
-
-    private var hero: some View {
-        ZStack(alignment: .topLeading) {
-            Circle()
-                .fill(XM5Palette.accent.opacity(0.12))
-                .frame(width: 153, height: 153)
-                .blur(radius: 27)
-                .offset(x: 184, y: 27)
-                .accessibilityHidden(true)
-
-            Image("XM5Hero")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 165, height: 156)
-                .offset(x: 151, y: 61)
-                .shadow(color: .black.opacity(0.72), radius: 20, x: 0, y: 14)
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 0) {
-                header
-                Spacer()
-                statusReadout
-            }
-            .padding(.horizontal, MenuBarMetrics.contentInset)
-            .padding(.top, MenuBarMetrics.contentInset)
-            .padding(.bottom, 52)
-
-        }
-        .frame(height: 228)
-        .clipped()
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(XM5Palette.line).frame(height: 1).padding(.horizontal, 12)
+    private var noSignalTitle: String {
+        switch headphones.linkState {
+        case .opening, .handshaking: "Linking to your headphones"
+        case .controlBusy: "Audio connected, controls busy"
+        case .failed: "Couldn't reach the headphones"
+        default: "No signal"
         }
     }
 
-    private var header: some View {
-        HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(headphones.deviceName)
-                    .font(.system(size: 19, weight: .medium))
-                    .tracking(-0.25)
-                    .foregroundStyle(XM5Palette.ink)
-                    .accessibilityIdentifier("menu.title")
-                Text("XM5 Control")
-                    .font(.system(size: 12))
-                    .foregroundStyle(XM5Palette.muted)
-            }
-            Spacer()
-            HStack(spacing: 6) {
-                HeaderActionButton(symbol: "slider.horizontal.3", label: "Settings") {
-                    navigate(to: .settings)
-                }
-                .keyboardShortcut(",", modifiers: .command)
-                HeaderActionButton(symbol: "arrow.clockwise", label: "Refresh headphone status") {
-                    headphones.refresh()
-                }
-                .keyboardShortcut("r", modifiers: .command)
-            }
+    private var noSignalGuidance: String {
+        switch headphones.linkState {
+        case .opening, .handshaking: "Keep them on and nearby."
+        case .controlBusy: "Another app holds Sony's control channel. Close Sound Connect on your phone; Cans retries on its own."
+        case .failed(let message): message
+        default: "Turn on your WH-1000XM4 or XM5. First time? Pair them in Bluetooth Settings."
         }
     }
 
-    private var statusReadout: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(headphones.isReady ? XM5Palette.success : XM5Palette.muted)
-                    .frame(width: 6, height: 6)
-                    .shadow(color: headphones.isReady ? XM5Palette.success.opacity(0.55) : .clear, radius: 5)
-                Text(headphones.statusText)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(XM5Palette.ink)
-                    .lineLimit(1)
-            }
+    // MARK: Inserts (settings): a rail of sections, one section on screen at a time.
 
-            if let battery = headphones.batteryLevel {
-                HStack(spacing: 8) {
-                    Image(systemName: headphones.isCharging ? "battery.100percent.bolt" : "battery.\(min(100, max(0, Int((Double(battery) / 25).rounded()) * 25)))percent")
-                        .font(.system(size: 18))
-                    Text("\(battery)%")
-                        .font(.system(size: 12, weight: .medium))
-                        .monospacedDigit()
-                }
-                .foregroundStyle(battery <= 15 ? Color.red : XM5Palette.ink)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Battery \(battery) percent\(headphones.isCharging ? ", charging" : "")")
-            } else {
-                Label("—", systemImage: "battery.0percent")
-                    .font(.system(size: 12))
-                    .foregroundStyle(XM5Palette.muted)
+    private var availableSections: [InsertSection] {
+        var sections: [InsertSection] = []
+        if headphones.isReady {
+            sections.append(.headphones)
+            if device.speakToChat != nil { sections.append(.speakToChat) }
+            if device.modelName != nil { sections.append(.noiseCancelling) }
+            if device.dseeExtreme != nil || device.prefersStableConnection != nil { sections.append(.sound) }
+            if device.touchPanel != nil || device.customButton != nil || device.pauseWhenRemoved != nil
+                || device.autoPowerOff != nil || device.multipoint != nil || device.voiceGuidance != nil {
+                sections.append(.controls)
             }
         }
+        sections += [.app, .diagnostics]
+        return sections
     }
 
-    private var controlDeck: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            modeSection
-            modeDetailPanel
-            presetSection
-            equalizerRow
-            connectionMessage
-        }
-        .padding(.horizontal, MenuBarMetrics.contentInset)
-        .padding(.top, 16)
+    private var currentSection: InsertSection {
+        availableSections.contains(section) ? section : (availableSections.first ?? .app)
     }
 
-    private var modeSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            sectionHeading(
-                "Listening mode",
-                showsProgress: headphones.isApplyingChange
-            )
-            HStack(spacing: 9) {
-                modeButton(.off)
-                modeButton(.anc)
-                modeButton(.ambient)
-            }
-            .padding(.horizontal, 8)
-        }
-    }
-
-    private var presetSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                ForEach(ListeningPreset.allCases) { preset in
-                    SceneButton(preset: preset, selected: isPresetSelected(preset)) {
-                        headphones.applyPreset(
-                            mode: preset.mode,
-                            ambientLevel: preset.level,
-                            focusOnVoice: preset.focusOnVoice
-                        )
-                    }
-                    .disabled(!headphones.isReady)
-                    .opacity(headphones.isReady ? 1 : 0.42)
-                    .help(presetDescription(preset))
-                    .accessibilityAddTraits(isPresetSelected(preset) ? .isSelected : [])
-                }
-            }
-        }
-    }
-
-    private var equalizerRow: some View {
-        HStack(spacing: 9) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Equalizer")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(XM5Palette.ink)
-            }
-            Spacer()
-            Menu {
-                ForEach(EqualizerPreset.selectableCases) { preset in
-                    Button {
-                        headphones.setEqualizerPreset(preset)
-                    } label: {
-                        if headphones.equalizerPreset == preset {
-                            Label(preset.title, systemImage: "checkmark")
-                        } else {
-                            Text(preset.title)
-                        }
-                    }
-                }
-                if !settings.equalizerProfiles.isEmpty {
-                    Divider()
-                    Menu("Mac Presets") {
-                        ForEach(settings.equalizerProfiles) { profile in
-                            Button(profile.name) {
-                                settings.customEqualizerDraft = profile.settings
-                                headphones.setCustomEqualizer(profile.settings)
-                            }
-                        }
-                    }
-                }
-                Divider()
-                Button("Custom Equalizer…") { showingEqualizerEditor = true }
-            } label: {
-                HStack(spacing: 6) {
-                    Text(headphones.equalizerPreset?.title ?? "Unavailable")
-                        .lineLimit(1)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 8, weight: .bold))
-                }
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(XM5Palette.accent)
-            }
-            .menuStyle(.borderlessButton)
-            .fixedSize()
-            .disabled(!headphones.isReady)
-            .help("Choose a Sony equalizer preset")
-            .accessibilityIdentifier("equalizer.preset")
-        }
-        .padding(.horizontal, 14)
-        .frame(height: 44)
-        .background(XM5Palette.soft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(XM5Palette.line, lineWidth: 0.75))
-    }
-
-    private var modeDetailPanel: some View {
-        ZStack {
-            if headphones.noiseControlMode == .ambient {
-                ambientControls
-            } else {
-                PassiveNoiseField(mode: headphones.noiseControlMode)
-            }
-        }
-        .frame(height: 116)
-    }
-
-    private var ambientControls: some View {
+    private var inserts: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Ambient sound")
-                    .font(.system(size: 12, weight: .medium))
-                Spacer()
-                Text("\(headphones.ambientLevel)")
-                    .font(.system(size: 12))
-                    .foregroundStyle(XM5Palette.muted)
-                Text("/ 20")
-                    .font(.system(size: 12))
-                    .foregroundStyle(XM5Palette.muted)
-            }
-
-            AmbientLevelTrack(level: headphones.ambientLevel) {
-                headphones.setAmbientLevel($0)
-            }
-            .padding(.top, 14)
-
-            Rectangle()
-                .fill(XM5Palette.line)
-                .frame(height: 1)
-                .padding(.top, 6)
-
             HStack(spacing: 10) {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("Focus on voice")
-                        .font(.system(size: 12, weight: .medium))
+                Button { navigate(to: .dashboard) } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "chevron.left").font(.system(size: 9, weight: .bold))
+                        Legend("Channel", size: 10.5, color: Console.legend)
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(height: 26)
+                    .background(Console.raised, in: RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Console.seam, lineWidth: 0.75))
                 }
+                .buttonStyle(PressStyle())
+                .keyboardShortcut(.cancelAction)
+                .accessibilityLabel("Back to channel")
+                ScribbleTape(text: "Inserts", size: 13)
                 Spacer()
-                Toggle(
-                    "",
-                    isOn: Binding(
-                        get: { headphones.focusOnVoice },
-                        set: { headphones.setFocusOnVoice($0) }
-                    )
-                )
-                .labelsHidden()
-                .toggleStyle(.switch)
-                .tint(XM5Palette.accent)
-                .controlSize(.mini)
-                .accessibilityLabel("Focus on voice")
+                Text("Cans \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")")
+                    .font(.system(size: 11).monospacedDigit())
+                    .foregroundStyle(Console.dim)
             }
-            .padding(.top, 6)
+            .padding(.horizontal, MenuBarMetrics.inset)
+            .padding(.vertical, 12)
+            GrooveSeam()
+
+            HStack(alignment: .top, spacing: 0) {
+                sectionRail
+                Rectangle().fill(Console.groove).frame(width: 1)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(currentSection.title)
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(Console.legend)
+                        Text(currentSection.summary)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Console.dim)
+                            .padding(.top, 3)
+                            .padding(.bottom, 12)
+                        sectionContent(currentSection)
+                    }
+                    .padding(.leading, 24)
+                    .padding(.trailing, MenuBarMetrics.inset)
+                    .padding(.vertical, 18)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .id(currentSection)
+            }
         }
-        .foregroundStyle(XM5Palette.ink)
-        .padding(14)
-        .frame(height: 116)
-        .background(XM5Palette.soft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(XM5Palette.line, lineWidth: 0.75))
+        .frame(height: max(contentHeight, MenuBarMetrics.insertsHeight))
+    }
+
+    private var sectionRail: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ForEach(availableSections) { item in
+                let selected = item == currentSection
+                Button { section = item } label: {
+                    HStack(spacing: 9) {
+                        Image(systemName: item.symbol)
+                            .font(.system(size: 12, weight: .medium))
+                            .frame(width: 16)
+                            .foregroundStyle(selected ? Console.amberInk : Console.dim)
+                        Text(item.title)
+                            .font(.system(size: 12.5, weight: selected ? .semibold : .regular))
+                            .foregroundStyle(selected ? Console.legend : Console.dim)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 10)
+                    .frame(height: 30)
+                    .background(selected ? Console.raised : .clear, in: RoundedRectangle(cornerRadius: 5))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+                .accessibilityIdentifier("section.\(item.rawValue)")
+            }
+            Spacer(minLength: 12)
+            Button("Quit Cans") { NSApp.terminate(nil) }
+                .buttonStyle(.plain)
+                .font(.system(size: 11.5))
+                .foregroundStyle(Console.dim)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 4)
+                .keyboardShortcut("q", modifiers: .command)
+                .accessibilityIdentifier("app.quit")
+        }
+        .padding(.vertical, 12)
+        .padding(.leading, MenuBarMetrics.inset - 10)
+        .padding(.trailing, 12)
+        .frame(width: 176, alignment: .topLeading)
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     @ViewBuilder
-    private var connectionMessage: some View {
-        if headphones.linkState == .controlBusy {
-            VStack(alignment: .leading, spacing: 9) {
-                Label("Bluetooth audio is connected, but Sony control is busy.", systemImage: "arrow.triangle.2.circlepath")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(XM5Palette.accent)
-                HStack {
-                    Text(headphones.retrySecondsRemaining.map { "Retrying in \($0)s" } ?? "Waiting to retry")
-                        .font(.system(size: 10))
-                        .foregroundStyle(XM5Palette.muted)
-                    Spacer()
-                    Button("Retry now") { headphones.refresh() }
-                        .buttonStyle(.plain)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(XM5Palette.accent)
+    private func sectionContent(_ section: InsertSection) -> some View {
+        switch section {
+        case .headphones: headphonesSection
+        case .speakToChat: speakToChatSection
+        case .noiseCancelling: optimizerSection
+        case .sound: soundSection
+        case .controls: controlsSection
+        case .app: appSection
+        case .diagnostics: diagnosticsSection
+        }
+    }
+
+    private var headphonesSection: some View {
+        HStack(alignment: .top, spacing: 20) {
+            ChannelPortrait(modelName: device.modelName ?? headphones.deviceName,
+                            mode: headphones.noiseControlMode, ambientLevel: headphones.ambientLevel)
+            VStack(alignment: .leading, spacing: 0) {
+                InfoRow(label: "Model", value: device.modelName ?? "Sony headphones")
+                InfoRow(label: "Firmware", value: headphones.firmwareVersion ?? "Unknown")
+                InfoRow(label: "Battery", value: headphones.batteryLevel.map { "\($0)%\(headphones.isCharging ? ", charging" : "")" } ?? "Unknown")
+                InfoRow(label: "Codec", value: device.codec ?? "Negotiating")
+                InfoRow(label: "Address", value: headphones.address.uppercased())
+                if device.modelName != nil {
+                    powerOffButton.padding(.top, 14)
                 }
             }
-            .padding(11)
-            .background(XM5Palette.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-        } else if case .failed(let message) = headphones.linkState {
-            Label(message, systemImage: "exclamationmark.triangle.fill")
-                .font(.system(size: 10))
-                .foregroundStyle(XM5Palette.accent)
-                .fixedSize(horizontal: false, vertical: true)
-        } else if !headphones.isDeviceConnected {
-            VStack(alignment: .leading, spacing: 10) {
-                Label("Power on the headphones, then connect them here.", systemImage: "antenna.radiowaves.left.and.right.slash")
-                    .font(.system(size: 10))
-                    .foregroundStyle(XM5Palette.muted)
-                Button("Connect WH-1000XM5") { headphones.connect() }
-                    .buttonStyle(.borderedProminent)
-                    .tint(XM5Palette.accent)
-                    .foregroundStyle(XM5Palette.canvas)
-                    .controlSize(.large)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityIdentifier("headphones.connect")
+        }
+    }
+
+    @ViewBuilder
+    private var speakToChatSection: some View {
+        if let stc = device.speakToChat {
+            RackRow(title: "Speak-to-Chat", detail: "Pauses music and lets sound in while you talk") {
+                LatchButton(accessibilityTitle: "Speak-to-Chat", isOn: stc) { device.setSpeakToChat(!stc) }
+            }
+            if stc, let config = device.speakToChatConfig {
+                RackRow(title: "Sensitivity", detail: "How readily your voice triggers it") {
+                    LampSelector(options: SonyDeviceSettings.SpeakToChatSensitivity.allCases.map { ($0, $0.title) },
+                                 selection: config.sensitivity) {
+                        var next = config; next.sensitivity = $0; device.setSpeakToChatConfig(next)
+                    }
+                }
+                RackRow(title: "Ends after", detail: "Silence before music resumes") {
+                    LampSelector(options: SonyDeviceSettings.SpeakToChatTimeout.allCases.map { ($0, $0.title) },
+                                 selection: config.timeout) {
+                        var next = config; next.timeout = $0; device.setSpeakToChatConfig(next)
+                    }
+                }
+                RackRow(title: "Focus on Voice", detail: "Lets voices through more clearly") {
+                    LatchButton(accessibilityTitle: "Speak-to-Chat focus on voice", isOn: config.focusOnVoice) {
+                        var next = config; next.focusOnVoice.toggle(); device.setSpeakToChatConfig(next)
+                    }
+                }
             }
         }
     }
 
-    private func modeButton(_ mode: NoiseControlMode) -> some View {
-        let selected = headphones.noiseControlMode == mode
-        return ListeningModeButton(
-            mode: mode,
-            selected: selected,
-            enabled: headphones.isReady
-        ) {
-            headphones.setNoiseControl(mode)
-        }
-    }
-
-    private func sectionHeading(
-        _ title: String,
-        value: String? = nil,
-        showsProgress: Bool = false
-    ) -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(XM5Palette.ink)
-            Spacer()
-            ProgressView()
-                .controlSize(.mini)
-                .tint(XM5Palette.accent)
-                .frame(width: 12, height: 12)
-                .opacity(showsProgress ? 1 : 0)
-                .accessibilityHidden(!showsProgress)
-                .accessibilityLabel("Applying headphone setting")
-            if let value {
-                Text(value)
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(XM5Palette.accent)
-            }
-        }
-    }
-
-    private var settingsPanel: some View {
+    private var optimizerSection: some View {
         VStack(spacing: 0) {
-            settingsHeader
-            ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    settingsDeviceCard
-                    settingsPreferences
-                    settingsDiagnostics
-                    Button { NSApp.terminate(nil) } label: {
-                        Label("Quit XM5 Control", systemImage: "power")
-                            .font(.system(size: 10, weight: .medium))
+            RackRow(title: "NC Optimizer",
+                    detail: device.optimizer.isRunning ? "\(device.optimizer.title) Keep them on and stay still." : "Tunes cancelling to your fit and air pressure") {
+                LampButton(title: device.optimizer.isRunning ? "Cancel" : "Run",
+                           lit: device.optimizer.isRunning, height: 26, fontSize: 10.5) {
+                    device.optimizer.isRunning ? device.cancelOptimizer() : device.startOptimizer()
+                }
+                .frame(width: 72)
+            }
+            if let pressure = device.pressureAtm {
+                RackRow(title: "Air pressure", detail: "Run the optimizer again after a flight") {
+                    HStack(spacing: 8) {
+                        // The headphones report 0.7–1.0 atm.
+                        LEDLadder(fraction: (pressure - 0.6) / 0.4, segments: 8)
+                        Text(String(format: "%.1f atm", pressure))
+                            .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                            .foregroundStyle(Console.legend)
                     }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(XM5Palette.muted)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityIdentifier("app.quit")
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(String(format: "Air pressure %.1f atmospheres", pressure))
                 }
-                .padding(.horizontal, MenuBarMetrics.contentInset)
-                .padding(.top, 14)
-                .padding(.bottom, 18)
             }
-            .scrollIndicators(.hidden)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 
-    private var settingsHeader: some View {
-        HStack(spacing: 10) {
-            HeaderActionButton(symbol: "chevron.left", label: "Back to headphone controls") {
-                navigate(to: .dashboard)
+    @ViewBuilder
+    private var soundSection: some View {
+        if let dsee = device.dseeExtreme {
+            RackRow(title: "DSEE Extreme", detail: "Upscales compressed music; uses more battery") {
+                LatchButton(accessibilityTitle: "DSEE Extreme", isOn: dsee) { device.setDSEEExtreme(!dsee) }
             }
-            .keyboardShortcut(.cancelAction)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text("CONTROL ROOM")
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .tracking(1.55)
-                    .foregroundStyle(XM5Palette.accent)
-                Text("Settings")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .tracking(-0.35)
-                    .foregroundStyle(XM5Palette.ink)
-            }
-            Spacer()
-            Text("v\(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1")")
-                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                .foregroundStyle(XM5Palette.muted)
         }
-        .padding(.horizontal, MenuBarMetrics.contentInset)
-        .frame(height: 60)
-        .background(Color.black.opacity(0.16))
-        .overlay(alignment: .bottom) { Rectangle().fill(XM5Palette.line).frame(height: 1) }
-    }
-
-    private var settingsDeviceCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeading("Headphones")
-            HStack(spacing: 11) {
-                ZStack {
-                    Circle().fill(XM5Palette.accent.opacity(0.11))
-                    Image(systemName: "headphones")
-                        .font(.system(size: 19, weight: .medium))
-                        .foregroundStyle(XM5Palette.accent)
+        if let stable = device.prefersStableConnection {
+            RackRow(title: "Bluetooth priority", detail: stable ? "Fewer dropouts, lower bitrate" : "Best sound, needs a strong signal") {
+                LampSelector(options: [(false, "Quality"), (true, "Stable")], selection: stable) {
+                    device.setPrefersStableConnection($0)
                 }
-                .frame(width: 38, height: 38)
+            }
+        }
+    }
 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(headphones.deviceName)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(XM5Palette.ink)
-                    Text(headphones.address.isEmpty ? "Bluetooth device not found" : headphones.address.uppercased())
-                        .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundStyle(XM5Palette.muted)
+    @ViewBuilder
+    private var controlsSection: some View {
+        if let touch = device.touchPanel {
+            RackRow(title: "Touch controls", detail: "Swipe and tap on the right ear cup") {
+                LatchButton(accessibilityTitle: "Touch controls", isOn: touch) { device.setTouchPanel(!touch) }
+            }
+        }
+        if let button = device.customButton {
+            RackRow(title: "Custom button", detail: "Set up assistants in Sound Connect") {
+                LampSelector(options: SonyDeviceSettings.CustomButton.allCases.map { ($0, $0.shortTitle) },
+                             selection: button) { device.setCustomButton($0) }
+            }
+        }
+        if let pause = device.pauseWhenRemoved {
+            RackRow(title: "Pause when taken off", detail: "Resumes when you put them back on") {
+                LatchButton(accessibilityTitle: "Pause when taken off", isOn: pause) { device.setPauseWhenRemoved(!pause) }
+            }
+        }
+        if let autoOff = device.autoPowerOff {
+            RackRow(title: "Auto power off", detail: "Saves battery when not worn") {
+                LampSelector(options: SonyDeviceSettings.AutoPowerOff.allCases.map { ($0, $0 == .whenRemoved ? "Taken off" : "Never") },
+                             selection: autoOff) { device.setAutoPowerOff($0) }
+            }
+        }
+        if let multipoint = device.multipoint {
+            RackRow(title: "Connect to 2 devices", detail: "Multipoint; turns off LDAC") {
+                LatchButton(accessibilityTitle: "Connect to 2 devices", isOn: multipoint) { confirmingMultipoint = true }
+            }
+        }
+        if let voice = device.voiceGuidance {
+            RackRow(title: "Voice guidance", detail: "Spoken status prompts in the headphones") {
+                LatchButton(accessibilityTitle: "Voice guidance", isOn: voice) { device.setVoiceGuidance(!voice) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var appSection: some View {
+        RackRow(title: "Reconnect automatically", detail: "Takes the controls back when they're free") {
+            LatchButton(accessibilityTitle: "Reconnect automatically", isOn: settings.reconnectAutomatically) {
+                settings.reconnectAutomatically.toggle()
+            }
+        }
+        RackRow(title: "Open at login", detail: "Cans waits quietly in the menu bar") {
+            LatchButton(accessibilityTitle: "Open at login", isOn: settings.launchAtLogin) {
+                settings.setLaunchAtLogin(!settings.launchAtLogin)
+            }
+        }
+        RackRow(title: "Shortcut ⌥⌘A", detail: "Switches between noise cancelling and ambient") {
+            LatchButton(accessibilityTitle: "Global shortcut", isOn: settings.globalShortcutEnabled) {
+                settings.globalShortcutEnabled.toggle()
+            }
+        }
+        if let error = settings.launchAtLoginError {
+            Text(error).font(.system(size: 11)).foregroundStyle(Console.legend).padding(.top, 8)
+        }
+    }
+
+    private var diagnosticsSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            InfoRow(label: "Control link", value: headphones.statusText)
+            InfoRow(label: "Protocol", value: headphones.protocolDescription)
+            InfoRow(label: "Last sync", value: headphones.lastSyncDate?.formatted(date: .omitted, time: .standard) ?? "Never")
+            if let error = headphones.lastErrorMessage {
+                InfoRow(label: "Last issue", value: error, warning: true)
+            }
+            HStack(spacing: 8) {
+                LampButton(title: "Sync now", lit: false, height: 26, fontSize: 10.5) { headphones.reloadFromDevice() }
+                    .keyboardShortcut("r", modifiers: .command)
+                LampButton(title: "Copy report", lit: false, height: 26, fontSize: 10.5) {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(headphones.diagnosticReport, forType: .string)
                 }
-                Spacer()
-                Text(headphones.isReady ? "READY" : "OFFLINE")
-                    .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .tracking(1.1)
-                    .foregroundStyle(headphones.isReady ? XM5Palette.success : XM5Palette.muted)
             }
-        }
-        .padding(11)
-        .background(XM5Palette.soft, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
-    }
-
-    private var settingsPreferences: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            sectionHeading("Behavior")
-            VStack(spacing: 0) {
-                settingsToggleRow(
-                    title: "Automatic reconnection",
-                    detail: "Restore Sony controls when the link becomes available",
-                    symbol: "arrow.triangle.2.circlepath",
-                    isOn: $settings.reconnectAutomatically
-                )
-                settingsDivider
-                settingsToggleRow(
-                    title: "Launch at login",
-                    detail: "Keep headphone controls ready after startup",
-                    symbol: "power",
-                    isOn: Binding(
-                        get: { settings.launchAtLogin },
-                        set: { settings.setLaunchAtLogin($0) }
-                    )
-                )
-                settingsDivider
-                settingsToggleRow(
-                    title: "Global shortcut",
-                    detail: "⌥⌘A switches between ANC and Ambient",
-                    symbol: "command",
-                    isOn: $settings.globalShortcutEnabled
-                )
-            }
-            .background(XM5Palette.soft, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
-
-            if let error = settings.launchAtLoginError {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.system(size: 10))
-                    .foregroundStyle(XM5Palette.accent)
-                    .padding(.horizontal, 4)
-            }
+            .frame(width: RackRow<EmptyView>.controlColumn)
+            .padding(.top, 16)
         }
     }
 
-    private var settingsDiagnostics: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            sectionHeading("Diagnostics")
-            VStack(spacing: 0) {
-                diagnosticRow("Bluetooth audio", headphones.isDeviceConnected ? "Connected" : "Disconnected")
-                settingsDivider
-                diagnosticRow("Control link", headphones.statusText)
-                settingsDivider
-                diagnosticRow("Protocol", headphones.controlChannelID.map { "MDR v2 · RFCOMM \($0)" } ?? "MDR v2")
-                settingsDivider
-                diagnosticRow("Firmware", headphones.firmwareVersion ?? "Unknown")
-                settingsDivider
-                diagnosticRow(
-                    "Last sync",
-                    headphones.lastSyncDate?.formatted(date: .abbreviated, time: .shortened) ?? "Never"
-                )
-                if let error = headphones.lastErrorMessage {
-                    settingsDivider
-                    diagnosticRow("Last issue", error, warning: true)
-                }
-                settingsDivider
-                HStack(spacing: 10) {
-                    Button { headphones.refresh() } label: {
-                        Label("Sync now", systemImage: "arrow.clockwise")
-                            .frame(maxWidth: .infinity)
-                    }
-                    Button { copyDiagnostics() } label: {
-                        Label("Copy report", systemImage: "doc.on.doc")
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                .font(.system(size: 10, weight: .semibold))
-                .buttonStyle(.plain)
-                .foregroundStyle(XM5Palette.accent)
-                .frame(height: 38)
-                .padding(.horizontal, 10)
+    /// Guarded like a covered switch: the first click arms it, the second sends power off.
+    private var powerOffButton: some View {
+        LampButton(title: powerOffArmed ? "Click to confirm" : "Power off", lit: powerOffArmed, height: 26, fontSize: 10.5) {
+            if powerOffArmed {
+                device.powerOff()
+                powerOffArmed = false
+            } else {
+                powerOffArmed = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { powerOffArmed = false }
             }
-            .background(XM5Palette.soft, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
         }
+        .frame(width: 140)
+        .help("Turn the headphones off")
     }
 
-    private func settingsToggleRow(
-        title: String,
-        detail: String,
-        symbol: String,
-        isOn: Binding<Bool>
-    ) -> some View {
-        HStack(spacing: 9) {
-            Image(systemName: symbol)
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(XM5Palette.accent)
-                .frame(width: 20)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(XM5Palette.ink)
-                Text(detail)
-                    .font(.system(size: 10))
-                    .foregroundStyle(XM5Palette.muted)
-                    .lineLimit(1)
-            }
-            Spacer()
-            Toggle("", isOn: isOn)
-                .labelsHidden()
-                .toggleStyle(.switch)
-                .controlSize(.mini)
-                .tint(XM5Palette.accent)
-        }
-        .padding(.horizontal, 11)
-        .frame(height: 50)
-    }
+    // MARK: Navigation
 
-    private func diagnosticRow(_ label: String, _ value: String, warning: Bool = false) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            Text(label)
-                .font(.system(size: 10, weight: .medium))
-                .foregroundStyle(XM5Palette.muted)
-            Spacer()
-            Text(value)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(warning ? XM5Palette.accent : XM5Palette.ink)
-                .lineLimit(1)
-        }
-        .padding(.horizontal, 11)
-        .frame(height: 32)
-    }
-
-    private var settingsDivider: some View {
-        Rectangle()
-            .fill(XM5Palette.line)
-            .frame(height: 1)
-            .padding(.leading, 11)
-    }
-
-    private func copyDiagnostics() {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(headphones.diagnosticReport, forType: .string)
+    private func slide(_ edge: Edge) -> AnyTransition {
+        reduceMotion ? .opacity : .asymmetric(insertion: .move(edge: edge).combined(with: .opacity), removal: .opacity)
     }
 
     private func navigate(to destination: PanelScreen) {
@@ -1073,29 +867,17 @@ struct MenuBarView: View {
         if reduceMotion {
             screen = destination
         } else {
-            withAnimation(.smooth(duration: 0.28)) {
-                screen = destination
-            }
+            withAnimation(.smooth(duration: 0.24)) { screen = destination }
         }
     }
+}
 
-    private func presetDescription(_ preset: ListeningPreset) -> String {
-        switch preset {
-        case .focus: "Noise cancelling for uninterrupted listening"
-        case .office: "Ambient level 8 with voice focus"
-        case .aware: "Maximum ambient awareness"
-        }
-    }
-
-    private func isPresetSelected(_ preset: ListeningPreset) -> Bool {
-        guard headphones.noiseControlMode == preset.mode else { return false }
-        switch preset {
-        case .focus:
-            return true
-        case .office:
-            return headphones.ambientLevel == preset.level && headphones.focusOnVoice
-        case .aware:
-            return headphones.ambientLevel == preset.level && !headphones.focusOnVoice
+private extension SonyDeviceSettings.CustomButton {
+    var shortTitle: String {
+        switch self {
+        case .ambientControl: "NC/Amb"
+        case .googleAssistant: "Google"
+        case .alexa: "Alexa"
         }
     }
 }

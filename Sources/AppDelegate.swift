@@ -9,6 +9,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var menuBarController: MenuBarController?
     private var globalHotKeyController: GlobalHotKeyController?
     private var cancellables = Set<AnyCancellable>()
+    /// SIGTERM (kill, some logout paths) bypasses AppKit's quit; route it through terminate so the
+    /// Sony control channel is released instead of staying reserved for the next launch.
+    private var terminationSource: DispatchSourceSignal?
     #if DEBUG
     private var uiTestWindow: NSWindow?
     #endif
@@ -26,12 +29,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        environment.headphones.disconnect()
+    }
+
     private var isRunningTests: Bool {
-        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil ||
+        AppEnvironment.isTestHost ||
             CommandLine.arguments.contains("--ui-test-host")
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        signal(SIGTERM, SIG_IGN)
+        let source = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+        source.setEventHandler { NSApp.terminate(nil) }
+        source.resume()
+        terminationSource = source
+
         #if MENU_BAR_APP || HYBRID_APP
         menuBarController = MenuBarController(environment: environment)
         globalHotKeyController = GlobalHotKeyController { [weak self] in
@@ -41,6 +54,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .removeDuplicates()
             .sink { [weak self] enabled in self?.globalHotKeyController?.setEnabled(enabled) }
             .store(in: &cancellables)
+        #endif
+
+        #if DEBUG
+        // Screenshot/review aid: --appearance=dark|light overrides the system appearance.
+        if let arg = CommandLine.arguments.first(where: { $0.hasPrefix("--appearance=") }) {
+            NSApp.appearance = NSAppearance(named: arg.hasSuffix("dark") ? .darkAqua : .aqua)
+        }
         #endif
 
         #if DEBUG && (MENU_BAR_APP || HYBRID_APP)
@@ -55,6 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let content = MenuBarView()
             .environmentObject(environment.settings)
             .environmentObject(environment.headphones)
+            .environmentObject(environment.headphones.deviceSettings)
         let controller = NSHostingController(rootView: content)
         let window = NSWindow(contentViewController: controller)
         window.title = String(localized: "app.name")

@@ -10,7 +10,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         case failed(String)
     }
 
-    @Published private(set) var deviceName = "WH-1000XM5"
+    @Published private(set) var deviceName = "Headphones"
     @Published private(set) var address = ""
     @Published private(set) var isDeviceConnected = false
     @Published private(set) var linkState: LinkState = .searching
@@ -29,9 +29,12 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     @Published private(set) var lastErrorMessage: String?
 
     var isReady: Bool { linkState == .ready }
+    var protocolDescription: String {
+        "MDR \(isV1 ? "v1" : "v2")" + (controlChannelID.map { " · RFCOMM \($0)" } ?? "")
+    }
     var statusText: String {
         switch linkState {
-        case .searching: "Looking for your XM5…"
+        case .searching: "Looking for your headphones…"
         case .disconnected: "Headphones disconnected"
         case .opening: "Opening Sony control link…"
         case .handshaking: "Syncing controls…"
@@ -43,12 +46,12 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
 
     var diagnosticReport: String {
         [
-            "XM5 Control diagnostics",
+            "Cans diagnostics",
             "Device: \(deviceName)",
             "Address: \(address.isEmpty ? "Not found" : address)",
             "Bluetooth audio: \(isDeviceConnected ? "Connected" : "Disconnected")",
             "Sony control: \(statusText)",
-            "Protocol: MDR v2 / RFCOMM\(controlChannelID.map { " channel \($0)" } ?? "")",
+            "Protocol: MDR \(isV1 ? "v1" : "v2") / RFCOMM\(controlChannelID.map { " channel \($0)" } ?? "")",
             "Firmware: \(firmwareVersion ?? "Unknown")",
             "Battery: \(batteryLevel.map { "\($0)%" } ?? "Unknown")",
             "Noise control: \(noiseControlMode?.title ?? "Unknown")",
@@ -63,10 +66,15 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         0x95, 0x6C, 0x7B, 0x26, 0xD4, 0x9A, 0x4B, 0xA8,
         0xB0, 0x3F, 0xB1, 0x7D, 0x39, 0x3C, 0xB6, 0xE2,
     ]
+    // WH-1000XM4 and older only expose the MDR v1 service.
+    private static let sonyV1UUIDBytes: [UInt8] = [
+        0x96, 0xCC, 0x20, 0x3E, 0x50, 0x68, 0x46, 0xAD,
+        0xB3, 0x2D, 0xE3, 0x16, 0xF5, 0xE0, 0x69, 0xBA,
+    ]
     private static let asmByFunction: [(function: UInt8, type: UInt8)] = [
         (0x6D, 0x19), (0x6B, 0x17), (0x68, 0x15), (0x67, 0x22), (0x66, 0x21),
     ]
-    private static let logger = Logger(subsystem: "local.xm5control", category: "SonyBluetooth")
+    private static let logger = Logger(subsystem: "app.cans.mac", category: "SonyBluetooth")
 
     private var device: IOBluetoothDevice?
     private var channel: IOBluetoothRFCOMMChannel?
@@ -75,6 +83,22 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     private var ambientWorkItem: DispatchWorkItem?
     private var commandTimeoutWorkItem: DispatchWorkItem?
     private var equalizerWorkItem: DispatchWorkItem?
+    private var linkTimeoutWorkItem: DispatchWorkItem?
+    private var openAttempt = 0
+    /// False for a controller created with startAutomatically: false (previews, test hosts);
+    /// such a controller must never open the link on its own.
+    private var isStarted = false
+    private var ackTimeoutWorkItem: DispatchWorkItem?
+    /// One request in flight at a time: the next command goes out only after the previous one's
+    /// reply (or a short timeout for commands the headphones don't answer). With pipelining, a late
+    /// reply to an older request can overwrite fresher state. Actions run in queue order too.
+    private enum Outgoing {
+        case frame(payload: [UInt8], type: UInt8)
+        case action(() -> Void)
+    }
+    private var outbox: [Outgoing] = []
+    private var awaitingReply = false
+    let deviceSettings = SonyDeviceSettings()
     private var stream = SonyFrameStream()
     private var stage: Stage = .idle
     private var sequence: UInt8 = 0
@@ -85,9 +109,16 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     private var retryAttempt = 0
     private var nextRetryDate: Date?
     private var syncPollCount = 0
+    private var isV1 = false
+    private var batteryRequest: [UInt8] { isV1 ? [0x10, 0x00] : [0x22, 0x00] }
+    private var equalizerType: UInt8 { isV1 ? 0x01 : 0x00 }
+    private var equalizerRequest: [UInt8] { [0x56, equalizerType] }
 
     init(startAutomatically: Bool = true, simulatedReady: Bool = false) {
         super.init()
+        deviceSettings.send = { [weak self] payload, tableTwo in
+            self?.send(payload, type: tableTwo ? 0x0E : 0x0C)
+        }
         #if DEBUG
         if simulatedReady {
             isSimulated = true
@@ -110,6 +141,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
             linkState = .disconnected
             return
         }
+        isStarted = true
         refresh()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.poll() }
@@ -118,7 +150,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
 
     func setReconnectAutomatically(_ enabled: Bool) {
         reconnectAutomatically = enabled
-        guard !isSimulated else { return }
+        guard !isSimulated, isStarted else { return }
         if enabled {
             refresh()
         } else {
@@ -135,9 +167,15 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         requestCurrentSettings()
     }
 
+    /// Releases Sony's control channel so the next owner (another launch, the phone) can take it at once.
+    func disconnect() {
+        reconnectAutomatically = false
+        closeSonyLink()
+    }
+
     func refreshEqualizer() {
         guard stage == .ready else { return }
-        send([0x56, 0x00])
+        send(equalizerRequest)
     }
 
     private func poll() {
@@ -151,26 +189,46 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         }
     }
 
+    /// Forgets everything the headphones reported and asks for all of it again, so what the UI
+    /// shows afterwards is provably what the headphones hold (used by Sync now and the hardware E2E suite).
+    func reloadFromDevice(completion: (() -> Void)? = nil) {
+        guard stage == .ready, let asmType else { completion?(); return }
+        enqueue { [weak self] in
+            self?.noiseControlMode = nil
+            self?.equalizerPreset = nil
+            self?.batteryLevel = nil
+            self?.deviceSettings.reset()
+        }
+        send([0x66, asmType])
+        send(batteryRequest)
+        send(equalizerRequest)
+        if isV1 { deviceSettings.requestAll() }
+        if let completion { enqueue(completion) }
+    }
+
     private func requestCurrentSettings() {
         guard stage == .ready, let asmType else { return }
         send([0x66, asmType])
-        send([0x22, 0x00])
-        send([0x56, 0x00])
+        send(batteryRequest)
+        send(equalizerRequest)
         if firmwareVersion == nil { send([0x04, 0x02]) }
     }
 
     private func refresh(shouldOpenLink: Bool) {
         let paired = (IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice]) ?? []
-        guard let match = paired.first(where: { ($0.name ?? "").localizedCaseInsensitiveContains("1000XM5") }) else {
+        guard let match = paired.first(where: {
+            let name = $0.name ?? ""
+            return name.localizedCaseInsensitiveContains("1000XM5") || name.localizedCaseInsensitiveContains("1000XM4")
+        }) else {
             closeSonyLink()
             device = nil
             address = ""
             isDeviceConnected = false
-            linkState = .failed("Pair your Sony XM5 in System Settings")
+            linkState = .failed("Pair your Sony WH-1000XM4 or XM5 in System Settings")
             return
         }
         device = match
-        deviceName = match.name ?? "Sony XM5"
+        deviceName = match.name ?? "Sony headphones"
         address = match.addressString ?? ""
         isDeviceConnected = match.isConnected()
         guard isDeviceConnected else {
@@ -216,9 +274,9 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         guard stage == .ready else { return }
         equalizerWorkItem?.cancel()
         beginApplyingChange()
-        send([0x58, 0x00, preset.rawValue, 0x00])
+        send([0x58, equalizerType, preset.rawValue, 0x00])
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
-            Task { @MainActor in self?.send([0x56, 0x00]) }
+            Task { @MainActor in guard let self else { return }; self.send(self.equalizerRequest) }
         }
     }
 
@@ -231,7 +289,11 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 self.beginApplyingChange()
-                self.send(settings.sonySetPayload)
+                var payload = settings.sonySetPayload
+                payload[1] = self.equalizerType
+                // Verified on a WH-1000XM4: it ignores A0 in a set and only takes FF for a custom curve.
+                if self.isV1 { payload[2] = 0xFF }
+                self.send(payload)
             }
         }
         equalizerWorkItem = workItem
@@ -251,6 +313,12 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
             return
         }
         guard stage == .ready, let asmType else { return }
+        if isV1 {
+            beginApplyingChange()
+            send([0x68, 0x02, mode == .off ? 0x00 : 0x11, 0x02, mode == .anc ? 0x02 : 0x00, 0x01,
+                  focusOnVoice ? 1 : 0, UInt8(max(1, min(20, ambientLevel)))])
+            return
+        }
         let noNoiseCancelling = asmType == 0x21 || asmType == 0x22
         let hasWindMode = asmType == 0x15
         let hasExtraAmbientFields = asmType == 0x19
@@ -293,10 +361,14 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         guard let device else { return }
         stage = .protocolInfo
         linkState = .opening
-        let uuid = Self.sonyUUIDBytes.withUnsafeBytes {
-            IOBluetoothSDPUUID(bytes: $0.baseAddress!, length: Self.sonyUUIDBytes.count)
+        func record(_ bytes: [UInt8]) -> IOBluetoothSDPServiceRecord? {
+            device.getServiceRecord(for: bytes.withUnsafeBytes {
+                IOBluetoothSDPUUID(bytes: $0.baseAddress!, length: bytes.count)
+            })
         }
-        guard let record = device.getServiceRecord(for: uuid) else {
+        let v2Record = record(Self.sonyUUIDBytes)
+        isV1 = v2Record == nil
+        guard let record = v2Record ?? record(Self.sonyV1UUIDBytes) else {
             fail("Sony control service is unavailable")
             return
         }
@@ -313,11 +385,24 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
             return
         }
         controlChannelID = Int(channelID)
-        Self.logger.info("Opening RFCOMM channel \(channelID)")
+        Self.logger.info("Opening RFCOMM channel \(channelID) [controller \(UInt(bitPattern: ObjectIdentifier(self).hashValue) & 0xFFFF, privacy: .public)]")
+        // bluetoothd can refuse the open (e.g. another process owns the channel) without calling back.
+        openAttempt &+= 1
+        let attempt = openAttempt
+        let timeout = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                guard let self, self.openAttempt == attempt, self.stage != .ready, self.stage != .idle else { return }
+                self.handleOpenFailure(kIOReturnTimeout)
+            }
+        }
+        linkTimeoutWorkItem?.cancel()
+        linkTimeoutWorkItem = timeout
+        DispatchQueue.main.asyncAfter(deadline: .now() + 11, execute: timeout)
     }
 
     private func closeSonyLink() {
         cancelScheduledRetry(resetAttempts: true)
+        deviceSettings.reset()
         channel?.close()
         channel = nil
         stage = .idle
@@ -335,21 +420,70 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
 
     private func beginHandshake() {
         sequence = 0
+        outbox.removeAll()
+        awaitingReply = false
         stream = SonyFrameStream()
         stage = .protocolInfo
         linkState = .handshaking
-        send([0x00, 0x00])
+        sendHandshake(attempt: 0)
     }
 
-    private func send(_ payload: [UInt8], type: UInt8 = 0x0C, sequence explicitSequence: UInt8? = nil) {
-        guard let channel else { return }
-        let frameSequence: UInt8
-        if let explicitSequence {
-            frameSequence = explicitSequence
-        } else {
-            frameSequence = sequence
-            sequence = 1 - sequence
+    /// Right after a reconnect the headphones often ignore the first init for a few seconds
+    /// (verified on a WH-1000XM4), so keep knocking instead of waiting out the link timeout.
+    private func sendHandshake(attempt: Int) {
+        guard stage == .protocolInfo, channel != nil, attempt < 8 else { return }
+        if attempt > 0 {
+            sequence = 0
+            outbox.removeAll()
+            awaitingReply = false
         }
+        send([0x00, 0x00])
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+            Task { @MainActor in self?.sendHandshake(attempt: attempt + 1) }
+        }
+    }
+
+    private func send(_ payload: [UInt8], type: UInt8 = 0x0C) {
+        guard channel != nil else { return }
+        outbox.append(.frame(payload: payload, type: type))
+        pumpOutbox()
+    }
+
+    /// Runs `action` once every request queued before it has been answered.
+    private func enqueue(_ action: @escaping () -> Void) {
+        outbox.append(.action(action))
+        pumpOutbox()
+    }
+
+    private func pumpOutbox() {
+        while !awaitingReply, !outbox.isEmpty {
+            switch outbox.removeFirst() {
+            case .action(let action):
+                action()
+            case .frame(let payload, let type):
+                awaitingReply = true
+                Self.logger.debug(">> \(String(format: "%02X", type), privacy: .public) \(payload.map { String(format: "%02X", $0) }.joined(separator: " "), privacy: .public)")
+                write(payload, type: type, sequence: sequence)
+                let timeout = DispatchWorkItem { [weak self] in
+                    Task { @MainActor in self?.replyReceived() }
+                }
+                ackTimeoutWorkItem?.cancel()
+                ackTimeoutWorkItem = timeout
+                // Some replies take ~0.6s right after a write; unanswered commands just cost this wait.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: timeout)
+            }
+        }
+    }
+
+    private func replyReceived() {
+        guard awaitingReply else { return }
+        ackTimeoutWorkItem?.cancel()
+        awaitingReply = false
+        pumpOutbox()
+    }
+
+    private func write(_ payload: [UInt8], type: UInt8, sequence frameSequence: UInt8) {
+        guard let channel else { return }
         let data = SonyFrameCodec.encode(type: type, sequence: frameSequence, payload: payload)
         let result = data.withUnsafeBytes { bytes -> IOReturn in
             guard let baseAddress = bytes.baseAddress else { return kIOReturnBadArgument }
@@ -360,16 +494,32 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
 
     private func receive(_ data: Data) {
         for frame in stream.append(data) {
-            if frame.type == 0x01 { continue }
-            if frame.type == 0x0C || frame.type == 0x0E {
-                send([], type: 0x01, sequence: 1 - frame.sequence)
+            Self.logger.debug("<< \(String(format: "%02X", frame.type), privacy: .public) \(frame.payload.map { String(format: "%02X", $0) }.joined(separator: " "), privacy: .public)")
+            if frame.type == 0x01 {
+                // The ACK carries the sequence number the headphones expect next. Following it (not
+                // toggling locally) keeps a lost ACK from making later commands look like retransmissions.
+                sequence = frame.sequence
+                continue
             }
-            if frame.type == 0x0C, !frame.payload.isEmpty { dispatch(frame.payload) }
+            if frame.type == 0x0C || frame.type == 0x0E {
+                write([], type: 0x01, sequence: 1 - frame.sequence)
+            }
+            guard !frame.payload.isEmpty else { continue }
+            defer { replyReceived() }
+            if frame.type == 0x0C {
+                dispatch(frame.payload)
+            } else if frame.type == 0x0E, isV1 {
+                deviceSettings.handle(frame.payload, tableTwo: true)
+            }
         }
     }
 
     private func dispatch(_ payload: [UInt8]) {
         switch (payload[0], stage) {
+        case (0x01, .protocolInfo) where isV1:
+            asmType = 0x02
+            stage = .noiseControl
+            send([0x66, 0x02])
         case (0x01, .protocolInfo):
             stage = .supportFunctions
             send([0x06, 0x00])
@@ -380,7 +530,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
                 return position < payload.count ? payload[position] : nil
             })
             guard let supported = Self.asmByFunction.first(where: { functions.contains($0.function) }) else {
-                fail("This XM5 did not report ANC support")
+                fail("These headphones did not report ANC support")
                 return
             }
             asmType = supported.type
@@ -388,19 +538,27 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
             send([0x66, supported.type])
         case (0x67, _), (0x69, _):
             parseNoiseControl(payload)
-        case (0x23, _), (0x25, _):
+        case (0x11, _) where isV1, (0x13, _) where isV1, (0x23, _) where !isV1, (0x25, _) where !isV1:
             parseBattery(payload)
         case (0x57, _), (0x59, _):
             parseEqualizer(payload)
-        case (0x05, _):
+        case (0x05, _) where payload.count > 1 && payload[1] == 0x02:
             parseFirmware(payload)
         default:
-            break
+            if isV1 { deviceSettings.handle(payload, tableTwo: false) }
         }
     }
 
     private func parseNoiseControl(_ payload: [UInt8]) {
         guard let asmType, (6...9).contains(payload.count), payload[1] == asmType else { return }
+        if isV1 {
+            // v1 layout: 67 02 <on> <setting type> <nc: 02, ambient: 00> <asm type> <voice> <level>
+            guard payload.count == 8 else { return }
+            focusOnVoice = payload[6] == 0x01
+            ambientLevel = min(20, Int(payload[7]))
+            markNoiseControlSynced(payload[2] == 0x00 ? .off : payload[4] == 0x00 ? .ambient : .anc)
+            return
+        }
         let noNoiseCancelling = asmType == 0x21 || asmType == 0x22
         let hasWindMode = asmType == 0x15
         let hasExtraAmbientFields = asmType == 0x19
@@ -419,6 +577,12 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         let level = Int(payload[index + 1])
         ambientLevel = (0...20).contains(level) ? level : 10
         if hasExtraAmbientFields { naExtra = [payload[index + 2], payload[index + 3]] }
+        markNoiseControlSynced(mode)
+    }
+
+    private func markNoiseControlSynced(_ mode: NoiseControlMode) {
+        linkTimeoutWorkItem?.cancel()
+        linkTimeoutWorkItem = nil
         noiseControlMode = mode
         stage = .ready
         linkState = .ready
@@ -433,9 +597,10 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         lastErrorMessage = nil
         lastSyncDate = Date()
         Self.logger.info("Noise control synced; mode=\(mode.rawValue, privacy: .public)")
-        if batteryLevel == nil { send([0x22, 0x00]) }
-        if equalizerPreset == nil { send([0x56, 0x00]) }
+        if batteryLevel == nil { send(batteryRequest) }
+        if equalizerPreset == nil { send(equalizerRequest) }
         if firmwareVersion == nil { send([0x04, 0x02]) }
+        if isV1, deviceSettings.modelName == nil { deviceSettings.requestAll() }
     }
 
     private func parseBattery(_ payload: [UInt8]) {
@@ -449,9 +614,11 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     }
 
     private func parseEqualizer(_ payload: [UInt8]) {
-        guard payload.count >= 3, payload[1] == 0x00 else { return }
+        guard payload.count >= 3, payload[1] == equalizerType else { return }
         equalizerPreset = EqualizerPreset(rawValue: payload[2])
-        if let settings = EqualizerSettings(sonyPayload: payload) {
+        var normalized = payload
+        normalized[1] = 0x00
+        if let settings = EqualizerSettings(sonyPayload: normalized) {
             customEqualizer = settings
         }
         lastSyncDate = Date()

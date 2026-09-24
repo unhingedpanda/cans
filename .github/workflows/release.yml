@@ -1,0 +1,34 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Unit tests
+        run: |
+          xcodegen
+          xcodebuild -project Cans.xcodeproj -scheme Cans -derivedDataPath build -only-testing:CansTests test
+      - name: Build ad-hoc zip
+        env:
+          CURRENT_PROJECT_VERSION: ${{ github.run_number }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Tag must be vX.Y.Z"; exit 1; }
+          scripts/release.sh "$version"
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "::warning title=Unnotarized build::Ad-hoc signed; first launch needs right-click → Open."
+          gh release create "$GITHUB_REF_NAME" release/Cans.zip release/Cans.zip.sha256 \
+            --title "Cans ${GITHUB_REF_NAME#v}" --generate-notes

@@ -1,0 +1,820 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0D68B13DF870FEDD7C69B266 /* SettingsStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97151A201CCE8441AD151B9B /* SettingsStoreTests.swift */; };
+		0D815807E8BD51C24CEB0EAD /* NowPlaying.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99CCECA72B8DC58BB7B55DB /* NowPlaying.swift */; };
+		0E90E7E8636DFBC00A51EE8E /* AppMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C5A2279D97CFD898BB42142 /* AppMain.swift */; };
+		1D503E42175FA9BC589104EF /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9BC071813C4D6D92169F92 /* MenuBarController.swift */; };
+		23CF3CC15124B9C7D44DBC2E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100BDF451945FD56E2EE5F8E /* AppDelegate.swift */; };
+		2620B8749D4DE58C9A040BE2 /* SonyDeviceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDF2B8EE32437E53DA42D2E /* SonyDeviceSettings.swift */; };
+		322F61E6A194C0B93B052B71 /* HardwareE2ETests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0DC584A56C42757C80F20D /* HardwareE2ETests.swift */; };
+		3AA9D31548448518D2C47730 /* ConsoleKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF2B1E9856AA21A77BFAA82F /* ConsoleKit.swift */; };
+		43A81A2BF11AC8DA33AD8B93 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AE453C1BC13101EA06565E /* MenuBarView.swift */; };
+		4CDA4FECBD6EC9F189C39462 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05541258C69CDEB8649D35FE /* AppEnvironment.swift */; };
+		51D6E74E553FB7CA76E55277 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8D6BDB0415A1360A375D4C1 /* Foundation.framework */; };
+		649EDBB721F76F8BF0AC67FD /* SonyProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A85C9CAAC2F3C19BAF62BB3F /* SonyProtocol.swift */; };
+		650E1BBAEC536C43BD756D04 /* GlobalHotKeyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71D9A0026CCC824519CF364F /* GlobalHotKeyController.swift */; };
+		80F8E9002129777C4D45D237 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DADF09883BB69077FC03D013 /* Localizable.xcstrings */; };
+		919D3195B3D3CBC20932E9E9 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4AC1FDB328A80F4B1C76693 /* SettingsStore.swift */; };
+		C09C34FAFE149FDA81697399 /* CansNowPlaying.m in Sources */ = {isa = PBXBuildFile; fileRef = FDEF7D304DCD77E5D2736DAB /* CansNowPlaying.m */; };
+		CEEC688F07F0C7BE4DFD96E8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 636E96C5AECB182719356C88 /* Assets.xcassets */; };
+		E2F428F73A431472FA5B7257 /* SonyHeadphonesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C64D733D36838EE652658D /* SonyHeadphonesController.swift */; };
+		E3606B97C9F25DD70985CEFA /* AppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80CFE52D336680EA690A4DC /* AppUITests.swift */; };
+		F36B0DD6720DD74B49583232 /* CansNowPlaying.dylib in Embed Dependencies */ = {isa = PBXBuildFile; fileRef = 0D77B61A7F53AD2DE87EFD9B /* CansNowPlaying.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F5FFF68224B4C781A03A9CB3 /* SonyProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C94C9745A2DA4E24E2D12F /* SonyProtocolTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		128FE7FDD0B0F971AEC8C042 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C696479F5D2BE19E1AA51211 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0F02729D3354F0B342CDB57;
+			remoteInfo = Cans;
+		};
+		488AFE9BF06D6208E6AB2CB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C696479F5D2BE19E1AA51211 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0F02729D3354F0B342CDB57;
+			remoteInfo = Cans;
+		};
+		4A3A16DDD5E491A6B67EC584 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C696479F5D2BE19E1AA51211 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0F02729D3354F0B342CDB57;
+			remoteInfo = Cans;
+		};
+		9A983AB000758A70A06238F5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C696479F5D2BE19E1AA51211 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26DC5B457C51E9A97FF10BB6;
+			remoteInfo = CansNowPlaying;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BF29ADA29B6B514CAA5E0E5B /* Embed Dependencies */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F36B0DD6720DD74B49583232 /* CansNowPlaying.dylib in Embed Dependencies */,
+			);
+			name = "Embed Dependencies";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		00C94C9745A2DA4E24E2D12F /* SonyProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonyProtocolTests.swift; sourceTree = "<group>"; };
+		05541258C69CDEB8649D35FE /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		0C5A2279D97CFD898BB42142 /* AppMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMain.swift; sourceTree = "<group>"; };
+		0D77B61A7F53AD2DE87EFD9B /* CansNowPlaying.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = CansNowPlaying.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		100BDF451945FD56E2EE5F8E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		31E27FFE510AEE673D135DE9 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		34C64D733D36838EE652658D /* SonyHeadphonesController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonyHeadphonesController.swift; sourceTree = "<group>"; };
+		44BF88EA0499F27586218B46 /* Cans.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cans.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		46F29560C98AC30194067045 /* CansUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E9BC071813C4D6D92169F92 /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		5D0DC584A56C42757C80F20D /* HardwareE2ETests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareE2ETests.swift; sourceTree = "<group>"; };
+		636E96C5AECB182719356C88 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		71D9A0026CCC824519CF364F /* GlobalHotKeyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKeyController.swift; sourceTree = "<group>"; };
+		97151A201CCE8441AD151B9B /* SettingsStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStoreTests.swift; sourceTree = "<group>"; };
+		A4AC1FDB328A80F4B1C76693 /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		A85C9CAAC2F3C19BAF62BB3F /* SonyProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonyProtocol.swift; sourceTree = "<group>"; };
+		A99CCECA72B8DC58BB7B55DB /* NowPlaying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlaying.swift; sourceTree = "<group>"; };
+		B58F03CF8710E9594CDC0E43 /* CansHardwareTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansHardwareTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C80CFE52D336680EA690A4DC /* AppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUITests.swift; sourceTree = "<group>"; };
+		D3AE453C1BC13101EA06565E /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		DADF09883BB69077FC03D013 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		E8D6BDB0415A1360A375D4C1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		EF2B1E9856AA21A77BFAA82F /* ConsoleKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleKit.swift; sourceTree = "<group>"; };
+		F3B6D82A1B3B6C22EF9C5950 /* CansTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CansTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCDF2B8EE32437E53DA42D2E /* SonyDeviceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonyDeviceSettings.swift; sourceTree = "<group>"; };
+		FDEF7D304DCD77E5D2736DAB /* CansNowPlaying.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CansNowPlaying.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BAB1C45466066016D4829A52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				51D6E74E553FB7CA76E55277 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		221239BB5CFAC816F14DAA8A /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				100BDF451945FD56E2EE5F8E /* AppDelegate.swift */,
+				05541258C69CDEB8649D35FE /* AppEnvironment.swift */,
+				0C5A2279D97CFD898BB42142 /* AppMain.swift */,
+				EF2B1E9856AA21A77BFAA82F /* ConsoleKit.swift */,
+				71D9A0026CCC824519CF364F /* GlobalHotKeyController.swift */,
+				4E9BC071813C4D6D92169F92 /* MenuBarController.swift */,
+				D3AE453C1BC13101EA06565E /* MenuBarView.swift */,
+				A99CCECA72B8DC58BB7B55DB /* NowPlaying.swift */,
+				A4AC1FDB328A80F4B1C76693 /* SettingsStore.swift */,
+				FCDF2B8EE32437E53DA42D2E /* SonyDeviceSettings.swift */,
+				34C64D733D36838EE652658D /* SonyHeadphonesController.swift */,
+				A85C9CAAC2F3C19BAF62BB3F /* SonyProtocol.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		4B4D1DD7141555E2198F5D7C /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				97151A201CCE8441AD151B9B /* SettingsStoreTests.swift */,
+				00C94C9745A2DA4E24E2D12F /* SonyProtocolTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		5E099BF7A9E7EB1488536055 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				31E27FFE510AEE673D135DE9 /* Debug.xcconfig */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		7126FE30635D605DEB8882D7 = {
+			isa = PBXGroup;
+			children = (
+				5E099BF7A9E7EB1488536055 /* Configuration */,
+				A8914E9C22B97E9C1B88B320 /* HardwareTests */,
+				7F6F58AB016BA8FC25B28ABC /* NowPlayingHelper */,
+				A31ECD0A7F7A589BB11DBC39 /* Resources */,
+				221239BB5CFAC816F14DAA8A /* Sources */,
+				4B4D1DD7141555E2198F5D7C /* Tests */,
+				A9C15C52E2ED409C81F62F3F /* UITests */,
+				8B62F4368FD9FD2899023E76 /* Frameworks */,
+				93C1D1C53C8C07C8504BE801 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7F6F58AB016BA8FC25B28ABC /* NowPlayingHelper */ = {
+			isa = PBXGroup;
+			children = (
+				FDEF7D304DCD77E5D2736DAB /* CansNowPlaying.m */,
+			);
+			path = NowPlayingHelper;
+			sourceTree = "<group>";
+		};
+		8B62F4368FD9FD2899023E76 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E8D6BDB0415A1360A375D4C1 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		93C1D1C53C8C07C8504BE801 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				44BF88EA0499F27586218B46 /* Cans.app */,
+				B58F03CF8710E9594CDC0E43 /* CansHardwareTests.xctest */,
+				0D77B61A7F53AD2DE87EFD9B /* CansNowPlaying.dylib */,
+				F3B6D82A1B3B6C22EF9C5950 /* CansTests.xctest */,
+				46F29560C98AC30194067045 /* CansUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A31ECD0A7F7A589BB11DBC39 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				636E96C5AECB182719356C88 /* Assets.xcassets */,
+				DADF09883BB69077FC03D013 /* Localizable.xcstrings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A8914E9C22B97E9C1B88B320 /* HardwareTests */ = {
+			isa = PBXGroup;
+			children = (
+				5D0DC584A56C42757C80F20D /* HardwareE2ETests.swift */,
+			);
+			path = HardwareTests;
+			sourceTree = "<group>";
+		};
+		A9C15C52E2ED409C81F62F3F /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				C80CFE52D336680EA690A4DC /* AppUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		099124B63331682095436601 /* CansUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0B49147D1944BE0879D5E151 /* Build configuration list for PBXNativeTarget "CansUITests" */;
+			buildPhases = (
+				00A3D413DCFE77B05232C30B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C6542E326F5F05AB2D61E4EE /* PBXTargetDependency */,
+			);
+			name = CansUITests;
+			packageProductDependencies = (
+			);
+			productName = CansUITests;
+			productReference = 46F29560C98AC30194067045 /* CansUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		17C7CAD0928976C43702309A /* CansHardwareTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 41AE02C24671D0FB5C40031A /* Build configuration list for PBXNativeTarget "CansHardwareTests" */;
+			buildPhases = (
+				79C5BECAC27C2D8EEF6DFC59 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8A0F73E88B5BF246C83984AF /* PBXTargetDependency */,
+			);
+			name = CansHardwareTests;
+			packageProductDependencies = (
+			);
+			productName = CansHardwareTests;
+			productReference = B58F03CF8710E9594CDC0E43 /* CansHardwareTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		23F34D49F791CEEA5FB36883 /* CansTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3CCAE04339622629A4798469 /* Build configuration list for PBXNativeTarget "CansTests" */;
+			buildPhases = (
+				EB1F60933E4E477223A45945 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4BCA0F33E07737D40FD11435 /* PBXTargetDependency */,
+			);
+			name = CansTests;
+			packageProductDependencies = (
+			);
+			productName = CansTests;
+			productReference = F3B6D82A1B3B6C22EF9C5950 /* CansTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		26DC5B457C51E9A97FF10BB6 /* CansNowPlaying */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 68168E0915DA39717E02A08E /* Build configuration list for PBXNativeTarget "CansNowPlaying" */;
+			buildPhases = (
+				8DAB55BA224C19B695441E8D /* Sources */,
+				BAB1C45466066016D4829A52 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CansNowPlaying;
+			packageProductDependencies = (
+			);
+			productName = CansNowPlaying;
+			productReference = 0D77B61A7F53AD2DE87EFD9B /* CansNowPlaying.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		C0F02729D3354F0B342CDB57 /* Cans */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C2EAC6CAF61A9AC7C7EDCECB /* Build configuration list for PBXNativeTarget "Cans" */;
+			buildPhases = (
+				C708059ABD606157379281DE /* Sources */,
+				BB17519D18A08D1D76DF74FD /* Resources */,
+				BF29ADA29B6B514CAA5E0E5B /* Embed Dependencies */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				16F7C00CEC66ECEA041E9922 /* PBXTargetDependency */,
+			);
+			name = Cans;
+			packageProductDependencies = (
+			);
+			productName = Cans;
+			productReference = 44BF88EA0499F27586218B46 /* Cans.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C696479F5D2BE19E1AA51211 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					099124B63331682095436601 = {
+						TestTargetID = C0F02729D3354F0B342CDB57;
+					};
+					C0F02729D3354F0B342CDB57 = {
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = 19084E7F6A04FA2425706D05 /* Build configuration list for PBXProject "Cans" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7126FE30635D605DEB8882D7;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 93C1D1C53C8C07C8504BE801 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C0F02729D3354F0B342CDB57 /* Cans */,
+				26DC5B457C51E9A97FF10BB6 /* CansNowPlaying */,
+				23F34D49F791CEEA5FB36883 /* CansTests */,
+				17C7CAD0928976C43702309A /* CansHardwareTests */,
+				099124B63331682095436601 /* CansUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BB17519D18A08D1D76DF74FD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEEC688F07F0C7BE4DFD96E8 /* Assets.xcassets in Resources */,
+				80F8E9002129777C4D45D237 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		00A3D413DCFE77B05232C30B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E3606B97C9F25DD70985CEFA /* AppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79C5BECAC27C2D8EEF6DFC59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				322F61E6A194C0B93B052B71 /* HardwareE2ETests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8DAB55BA224C19B695441E8D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C09C34FAFE149FDA81697399 /* CansNowPlaying.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C708059ABD606157379281DE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23CF3CC15124B9C7D44DBC2E /* AppDelegate.swift in Sources */,
+				4CDA4FECBD6EC9F189C39462 /* AppEnvironment.swift in Sources */,
+				0E90E7E8636DFBC00A51EE8E /* AppMain.swift in Sources */,
+				3AA9D31548448518D2C47730 /* ConsoleKit.swift in Sources */,
+				650E1BBAEC536C43BD756D04 /* GlobalHotKeyController.swift in Sources */,
+				1D503E42175FA9BC589104EF /* MenuBarController.swift in Sources */,
+				43A81A2BF11AC8DA33AD8B93 /* MenuBarView.swift in Sources */,
+				0D815807E8BD51C24CEB0EAD /* NowPlaying.swift in Sources */,
+				919D3195B3D3CBC20932E9E9 /* SettingsStore.swift in Sources */,
+				2620B8749D4DE58C9A040BE2 /* SonyDeviceSettings.swift in Sources */,
+				E2F428F73A431472FA5B7257 /* SonyHeadphonesController.swift in Sources */,
+				649EDBB721F76F8BF0AC67FD /* SonyProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB1F60933E4E477223A45945 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0D68B13DF870FEDD7C69B266 /* SettingsStoreTests.swift in Sources */,
+				F5FFF68224B4C781A03A9CB3 /* SonyProtocolTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		16F7C00CEC66ECEA041E9922 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26DC5B457C51E9A97FF10BB6 /* CansNowPlaying */;
+			targetProxy = 9A983AB000758A70A06238F5 /* PBXContainerItemProxy */;
+		};
+		4BCA0F33E07737D40FD11435 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0F02729D3354F0B342CDB57 /* Cans */;
+			targetProxy = 128FE7FDD0B0F971AEC8C042 /* PBXContainerItemProxy */;
+		};
+		8A0F73E88B5BF246C83984AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0F02729D3354F0B342CDB57 /* Cans */;
+			targetProxy = 4A3A16DDD5E491A6B67EC584 /* PBXContainerItemProxy */;
+		};
+		C6542E326F5F05AB2D61E4EE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0F02729D3354F0B342CDB57 /* Cans */;
+			targetProxy = 488AFE9BF06D6208E6AB2CB3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		182AF4D8E2A158CD99E50881 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansNowPlaying;
+				PRODUCT_NAME = CansNowPlaying;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		1FC9992FFC79157BDE1E141A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.2.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		22B984B6352BAF3E99EF43AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Configuration/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.mac;
+				PRODUCT_MODULE_NAME = Cans;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = MENU_BAR_APP;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		28EA3755E133C67C4D6CC0A8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_PREFIX = lib;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansNowPlaying;
+				PRODUCT_NAME = CansNowPlaying;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		2E7EB25331CBF9617F70A8E8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansTests;
+				PRODUCT_MODULE_NAME = CansTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cans.app/Contents/MacOS/Cans";
+			};
+			name = Release;
+		};
+		3C98578A524039F3C107F5F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansHardwareTests;
+				PRODUCT_MODULE_NAME = CansHardwareTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cans.app/Contents/MacOS/Cans";
+			};
+			name = Debug;
+		};
+		8ED63EFCAF6D1BF050B230E5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.2.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		95C18FA5A8D5A67660282E21 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 31E27FFE510AEE673D135DE9 /* Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				INFOPLIST_FILE = Configuration/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.mac;
+				PRODUCT_MODULE_NAME = Cans;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG MENU_BAR_APP";
+			};
+			name = Debug;
+		};
+		9C20DBD8C457FD8282EC5537 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansTests;
+				PRODUCT_MODULE_NAME = CansTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cans.app/Contents/MacOS/Cans";
+			};
+			name = Debug;
+		};
+		CA83418C7A7596BD316A59B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansUITests;
+				PRODUCT_MODULE_NAME = CansUITests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = Cans;
+			};
+			name = Debug;
+		};
+		DA45BD7A8BA04C8BF5EF4071 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansUITests;
+				PRODUCT_MODULE_NAME = CansUITests;
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = Cans;
+			};
+			name = Release;
+		};
+		DAA66F79965E20CDDA9EE7E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.cans.CansHardwareTests;
+				PRODUCT_MODULE_NAME = CansHardwareTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Cans.app/Contents/MacOS/Cans";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0B49147D1944BE0879D5E151 /* Build configuration list for PBXNativeTarget "CansUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA83418C7A7596BD316A59B9 /* Debug */,
+				DA45BD7A8BA04C8BF5EF4071 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		19084E7F6A04FA2425706D05 /* Build configuration list for PBXProject "Cans" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8ED63EFCAF6D1BF050B230E5 /* Debug */,
+				1FC9992FFC79157BDE1E141A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3CCAE04339622629A4798469 /* Build configuration list for PBXNativeTarget "CansTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C20DBD8C457FD8282EC5537 /* Debug */,
+				2E7EB25331CBF9617F70A8E8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		41AE02C24671D0FB5C40031A /* Build configuration list for PBXNativeTarget "CansHardwareTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C98578A524039F3C107F5F6 /* Debug */,
+				DAA66F79965E20CDDA9EE7E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		68168E0915DA39717E02A08E /* Build configuration list for PBXNativeTarget "CansNowPlaying" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				182AF4D8E2A158CD99E50881 /* Debug */,
+				28EA3755E133C67C4D6CC0A8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C2EAC6CAF61A9AC7C7EDCECB /* Build configuration list for PBXNativeTarget "Cans" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				95C18FA5A8D5A67660282E21 /* Debug */,
+				22B984B6352BAF3E99EF43AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C696479F5D2BE19E1AA51211 /* Project object */;
+}

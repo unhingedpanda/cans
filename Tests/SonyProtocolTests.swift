@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import XM5Control
+@testable import Cans
 
 final class SonyProtocolTests: XCTestCase {
     func testReconnectBackoffCapsAtThirtySeconds() {
@@ -40,5 +40,48 @@ final class SonyProtocolTests: XCTestCase {
 
         let response = [UInt8(0x57)] + Array(settings.sonySetPayload.dropFirst())
         XCTAssertEqual(EqualizerSettings(sonyPayload: response), settings)
+    }
+
+    /// Replies captured from a real WH-1000XM4 (firmware 3.0.1).
+    @MainActor
+    func testDeviceSettingsParseRealXM4Replies() {
+        let settings = SonyDeviceSettings()
+        var sent: [[UInt8]] = []
+        settings.send = { payload, _ in sent.append(payload) }
+        let replies: [[UInt8]] = [
+            [0x05, 0x01, 0x0A] + Array("WH-1000XM4".utf8),
+            [0x19, 0x00, 0x02], [0x15, 0x00, 0x02, 0x01], [0xE7, 0x01, 0x00, 0x00], [0xE7, 0x02, 0x00, 0x01],
+            [0xD7, 0xD1, 0x01, 0x01], [0xD7, 0xD2, 0x01, 0x00], [0xF7, 0x03, 0x00, 0x01], [0xF7, 0x04, 0x01, 0x10, 0x00],
+            [0xF7, 0x05, 0x00, 0x01], [0xFB, 0x05, 0x00, 0x00, 0x01, 0x00], [0xF7, 0x06, 0x01, 0x00],
+            [0xA7, 0x01, 0x20, 0x10], [0xA3, 0x01, 0x00, 0x02], [0x87, 0x01, 0x01, 0x01, 0x01, 0x09],
+        ]
+        for reply in replies { XCTAssertTrue(settings.handle(reply, tableTwo: false), "\(reply)") }
+        XCTAssertTrue(settings.handle([0x47, 0x01, 0x01, 0x01], tableTwo: true))
+
+        XCTAssertEqual(settings.modelName, "WH-1000XM4")
+        XCTAssertEqual(settings.codec, "AAC")
+        XCTAssertEqual(settings.dseeActive, true)
+        XCTAssertEqual(settings.prefersStableConnection, false)
+        XCTAssertEqual(settings.dseeExtreme, true)
+        XCTAssertEqual(settings.touchPanel, true)
+        XCTAssertEqual(settings.multipoint, false)
+        XCTAssertEqual(settings.pauseWhenRemoved, true)
+        XCTAssertEqual(settings.autoPowerOff, .whenRemoved)
+        XCTAssertEqual(settings.speakToChat, true)
+        XCTAssertEqual(settings.speakToChatConfig, .init(sensitivity: .auto, focusOnVoice: true, timeout: .short))
+        XCTAssertEqual(settings.customButton, .ambientControl)
+        XCTAssertEqual(settings.isPlaying, false)
+        XCTAssertEqual(settings.pressureAtm, 0.9)
+        XCTAssertEqual(settings.voiceGuidance, true)
+
+        // The speak-to-chat "preview" notify (type 02) must not flip the setting.
+        settings.handle([0xF9, 0x05, 0x02, 0x00], tableTwo: false)
+        XCTAssertEqual(settings.speakToChat, true)
+
+        // Setters emit the verified command bytes.
+        settings.setMultipoint(true)
+        settings.setSpeakToChat(false)
+        settings.setAutoPowerOff(.never)
+        XCTAssertEqual(sent.suffix(3), [[0xD8, 0xD2, 0x01, 0x01], [0xF8, 0x05, 0x01, 0x00], [0xF8, 0x04, 0x01, 0x11, 0x00]])
     }
 }
