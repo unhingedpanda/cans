@@ -84,12 +84,20 @@ It follows your Mac's appearance.
 
 ## Install
 
-1. Download `Cans.zip` from the [latest release](../../releases/latest) and unzip it.
-2. Move **Cans.app** to **/Applications**.
-3. On first launch, right-click **Cans.app** → **Open**. It's ad-hoc signed, not notarized. If macOS still refuses, go to **System Settings → Privacy & Security** and click **Open Anyway**.
-4. Allow Bluetooth access when asked.
+**With Homebrew**
 
-Verify the download with `shasum -a 256 -c Cans.zip.sha256`.
+```sh
+brew install --cask unhingedpanda/tap/cans
+```
+
+**Or by hand:** download `Cans.zip` from the [latest release](../../releases/latest), unzip it, and move **Cans.app** to **/Applications**. You can verify the download with `shasum -a 256 -c Cans.zip.sha256`.
+
+**First launch.** Cans isn't notarized yet (that needs a paid Apple developer account), so macOS blocks it the first time you open it:
+
+- **macOS 15 and later:** open Cans once, then go to **System Settings → Privacy & Security**, click **Open Anyway** next to Cans, and confirm.
+- **macOS 14:** right-click **Cans.app** → **Open**.
+
+Then allow Bluetooth access when asked.
 
 ## Good to know
 
