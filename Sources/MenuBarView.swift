@@ -139,6 +139,7 @@ struct MenuBarView: View {
             if ready, CommandLine.arguments.contains("--show-inserts") {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { navigate(to: .inserts) }
             }
+            if ready, CommandLine.arguments.contains("--demo-tour") { runDemoTour() }
             #endif
         }
         .accessibilityIdentifier(screen == .dashboard ? "headphones.dashboard" : "settings.inline")
@@ -861,6 +862,44 @@ struct MenuBarView: View {
         .frame(width: 140)
         .help("Turn the headphones off")
     }
+
+    #if DEBUG
+    /// Capture aid: --demo-tour plays a scripted walk through the real controls on the real
+    /// headphones (for the README GIF and launch video), then restores NC with EQ off.
+    private func runDemoTour() {
+        Task { @MainActor in
+            func wait(_ seconds: Double) async { try? await Task.sleep(for: .seconds(seconds)) }
+            headphones.applyPreset(mode: .anc, ambientLevel: 1, focusOnVoice: false)
+            headphones.setEqualizerPreset(.off)
+            await wait(4)
+            headphones.applyPreset(mode: .ambient, ambientLevel: 4, focusOnVoice: false)
+            await wait(1.2)
+            for level in stride(from: 6, through: 20, by: 2) {
+                headphones.setAmbientLevel(level)
+                await wait(0.22)
+            }
+            await wait(1.6)
+            headphones.applyPreset(mode: .ambient, ambientLevel: 8, focusOnVoice: true)  // Office scene
+            await wait(2.2)
+            headphones.setEqualizerPreset(.bassBoost)
+            await wait(2)
+            headphones.setEqualizerPreset(.bright)
+            await wait(2)
+            headphones.setNoiseControl(.anc)
+            await wait(2.4)
+            section = .speakToChat  // Headphones shows the Bluetooth address; keep it out of recordings
+            navigate(to: .inserts)
+            for next in [InsertSection.noiseCancelling, .sound, .controls] {
+                await wait(1.6)
+                section = next
+            }
+            await wait(1.8)
+            navigate(to: .dashboard)
+            headphones.setEqualizerPreset(.off)
+            headphones.applyPreset(mode: .anc, ambientLevel: 1, focusOnVoice: false)
+        }
+    }
+    #endif
 
     // MARK: Navigation
 

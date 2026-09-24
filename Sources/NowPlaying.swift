@@ -31,7 +31,19 @@ final class NowPlaying: ObservableObject {
         Bundle.main.privateFrameworksURL?.appendingPathComponent("libCansNowPlaying.dylib").path
     }
 
+    #if DEBUG
+    /// Capture aid: --demo-track=Title|Artist|App shows a stand-in track instead of the real one.
+    private static let demoTrack = CommandLine.arguments.first { $0.hasPrefix("--demo-track=") }
+        .map { $0.dropFirst("--demo-track=".count).split(separator: "|").map(String.init) }
+    #endif
+
     func start() {
+        #if DEBUG
+        if let demo = Self.demoTrack, let title = demo.first {
+            track = Track(title: title, artist: demo.dropFirst().first, isPlaying: true, appName: demo.dropFirst(2).first)
+            return
+        }
+        #endif
         guard stream == nil, let helper = Self.helper else { return }
         let process = Process()
         process.executableURL = Self.perl
@@ -63,6 +75,12 @@ final class NowPlaying: ObservableObject {
 
     /// Play/pause, next or previous in whichever app owns Now Playing.
     func perform(_ command: String) {
+        #if DEBUG
+        if Self.demoTrack != nil {
+            if command == "playpause" { track?.isPlaying.toggle() }
+            return
+        }
+        #endif
         guard let helper = Self.helper else { return }
         let process = Process()
         process.executableURL = Self.perl

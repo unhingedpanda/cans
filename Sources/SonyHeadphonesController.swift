@@ -229,6 +229,12 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
         }
         device = match
         deviceName = match.name ?? "Sony headphones"
+        #if DEBUG
+        // Capture aid: --demo-name=… keeps a personal device name out of recordings.
+        if let name = CommandLine.arguments.first(where: { $0.hasPrefix("--demo-name=") }) {
+            deviceName = String(name.dropFirst("--demo-name=".count))
+        }
+        #endif
         address = match.addressString ?? ""
         isDeviceConnected = match.isConnected()
         guard isDeviceConnected else {

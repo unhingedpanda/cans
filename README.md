@@ -1,9 +1,25 @@
 # Cans
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/media/hero-dark.jpg">
+    <img src="docs/media/hero-light.jpg" alt="Cans: the menu bar panel with noise control, scenes, now playing and the EQ faders" width="100%">
+  </picture>
+</p>
+
 A menu bar controller for Sony **WH-1000XM4** and **WH-1000XM5** headphones on macOS. Everything Sony Sound Connect does that makes sense on a Mac, one click from the menu bar, no phone needed.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/yash.raj)
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/media/demo-dark.gif">
+    <img src="docs/media/demo-light.gif" alt="Cans switching noise control, sweeping the ambient level, recalling scenes, changing EQ, and browsing Inserts on a real WH-1000XM4" width="660">
+  </picture>
+</p>
+
+<p align="center"><sub>Recorded live on a WH-1000XM4. Every change is read back from the headphones.</sub></p>
 
 ## What it controls
 
@@ -53,6 +69,8 @@ open Cans.xcodeproj         # or: scripts/release.sh → release/Cans.zip
 ```
 
 Requires Xcode 16+ and macOS 14+. Pushing a `vX.Y.Z` tag runs `.github/workflows/release.yml`, which tests, builds, and publishes the zip to GitHub Releases.
+
+Debug builds take capture flags for README media: `--ui-test-host` shows the panel in a window, `--demo-tour` walks through the controls on the connected headphones and then restores NC with EQ off, `--demo-name=WH-1000XM4` hides a personal device name, `--demo-track="Title|Artist|App"` shows a stand-in track, and `--appearance=dark|light` forces an appearance.
 
 ### End-to-end tests (real headphones)
 
