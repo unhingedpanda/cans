@@ -870,31 +870,33 @@ struct MenuBarView: View {
     private func runDemoTour() {
         Task { @MainActor in
             func wait(_ seconds: Double) async { try? await Task.sleep(for: .seconds(seconds)) }
+            // About 27 s, paced for people watching on a phone: quick where nothing changes,
+            // slow where the eye has to follow (the ambient sweep, scenes, EQ, settings pages).
             headphones.applyPreset(mode: .anc, ambientLevel: 1, focusOnVoice: false)
             headphones.setEqualizerPreset(.off)
-            await wait(4)
+            await wait(2.5)
             headphones.applyPreset(mode: .ambient, ambientLevel: 4, focusOnVoice: false)
-            await wait(1.2)
+            await wait(1.5)
             for level in stride(from: 6, through: 20, by: 2) {
                 headphones.setAmbientLevel(level)
-                await wait(0.22)
+                await wait(0.35)
             }
-            await wait(1.6)
+            await wait(2)
             headphones.applyPreset(mode: .ambient, ambientLevel: 8, focusOnVoice: true)  // Office scene
-            await wait(2.2)
+            await wait(2.8)
             headphones.setEqualizerPreset(.bassBoost)
-            await wait(2)
-            headphones.setEqualizerPreset(.bright)
-            await wait(2)
-            headphones.setNoiseControl(.anc)
             await wait(2.4)
+            headphones.setEqualizerPreset(.bright)
+            await wait(2.4)
+            headphones.setNoiseControl(.anc)
+            await wait(2)
             section = .speakToChat  // Headphones shows the Bluetooth address; keep it out of recordings
             navigate(to: .inserts)
-            for next in [InsertSection.noiseCancelling, .sound, .controls] {
-                await wait(1.6)
+            for next in [InsertSection.noiseCancelling, .controls] {
+                await wait(2.4)
                 section = next
             }
-            await wait(1.8)
+            await wait(2.4)
             navigate(to: .dashboard)
             headphones.setEqualizerPreset(.off)
             headphones.applyPreset(mode: .anc, ambientLevel: 1, focusOnVoice: false)
