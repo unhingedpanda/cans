@@ -10,6 +10,7 @@
 
 typedef void (*GetInfoFn)(dispatch_queue_t, void (^)(NSDictionary *));
 typedef void (*GetAppFn)(dispatch_queue_t, void (^)(id));
+typedef void (*IsPlayingFn)(dispatch_queue_t, void (^)(Boolean));
 typedef void (*RegisterFn)(dispatch_queue_t);
 typedef Boolean (*SendCommandFn)(int, NSDictionary *);
 
@@ -40,12 +41,22 @@ static void emit(void) {
                 fflush(stdout);
             }
         };
-        if (!getApp) { finish(nil); return; }
-        getApp(dispatch_get_main_queue(), ^(id client) {
-            NSString *bundleID = nil;
-            SEL sel = NSSelectorFromString(@"bundleIdentifier");
-            if (client && [client respondsToSelector:sel]) bundleID = [client performSelector:sel];
-            finish(bundleID);
+        void (^withApp)(void) = ^{
+            if (!getApp) { finish(nil); return; }
+            getApp(dispatch_get_main_queue(), ^(id client) {
+                NSString *bundleID = nil;
+                SEL sel = NSSelectorFromString(@"bundleIdentifier");
+                if (client && [client respondsToSelector:sel]) bundleID = [client performSelector:sel];
+                finish(bundleID);
+            });
+        };
+        // The app-level flag is authoritative: the track's playback rate can stay at 1 after a
+        // pause (the TV app does this), which would show a paused video as playing.
+        IsPlayingFn isPlaying = (IsPlayingFn)MR("MRMediaRemoteGetNowPlayingApplicationIsPlaying");
+        if (!isPlaying) { withApp(); return; }
+        isPlaying(dispatch_get_main_queue(), ^(Boolean playing) {
+            out[@"playing"] = @(playing != 0);
+            withApp();
         });
     });
 }
