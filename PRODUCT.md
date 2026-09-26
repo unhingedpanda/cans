@@ -20,7 +20,7 @@ Success means never reaching for the phone to change a headphone setting while a
 
 ## Positioning
 
-Native, instant, and tiny: no account, no location tracking, no network access, no marketing surfaces. Sound Connect is slow to connect, cluttered, and phone-only. Cans runs from the menu bar in a few MB of RAM and applies changes the moment you click.
+Native, instant, and tiny: no account, no location tracking, no marketing surfaces; the only network call is a daily update check (Sparkle, can be turned off). Sound Connect is slow to connect, cluttered, and phone-only. Cans runs from the menu bar in a few MB of RAM and applies changes the moment you click.
 
 ## Operating Context
 

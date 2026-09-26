@@ -25,10 +25,14 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Tag must be vX.Y.Z"; exit 1; }
           scripts/release.sh "$version"
+      - name: Sign for Sparkle and write appcast
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: scripts/appcast.sh "${GITHUB_REF_NAME#v}" "${{ github.run_number }}"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           echo "::warning title=Unnotarized build::Ad-hoc signed, not notarized: first launch needs Open Anyway in Privacy & Security (macOS 15+)."
-          gh release create "$GITHUB_REF_NAME" release/Cans.zip release/Cans.zip.sha256 \
+          gh release create "$GITHUB_REF_NAME" release/Cans.zip release/Cans.zip.sha256 release/appcast.xml \
             --title "Cans ${GITHUB_REF_NAME#v}" --generate-notes

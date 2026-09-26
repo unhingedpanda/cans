@@ -10,6 +10,10 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     MARKETING_VERSION: "1.0.1"
     CURRENT_PROJECT_VERSION: "1"
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.10.0"
 targets:
   Cans:
     type: application
@@ -28,9 +32,20 @@ targets:
         LSMinimumSystemVersion: "14.0"
         NSBluetoothAlwaysUsageDescription: Cans uses Bluetooth to read and change your Sony headphone settings.
         NSHumanReadableCopyright: "MIT License. Based on XM5 Control by Maadlou."
+        # Sparkle: the release workflow attaches appcast.xml, signed with this key's private half.
+        SUFeedURL: https://github.com/unhingedpanda/cans/releases/latest/download/appcast.xml
+        SUPublicEDKey: MPbJcviNyiA2pr+Q/iJ2Gh+xAdIOG+Rb9YPbhOpkFCg=
+        SUEnableAutomaticChecks: true
     # Not sandboxed: distributed outside the App Store, and reading the system Now Playing
     # needs Apple's perl host (see NowPlayingHelper), which the sandbox would block.
+    entitlements:
+      path: Configuration/Cans.entitlements
+      properties:
+        # Ad-hoc signing has no Team ID, so the hardened runtime would refuse to load the embedded
+        # Sparkle.framework. Drop this once a Developer ID signs the app and Sparkle as one team.
+        com.apple.security.cs.disable-library-validation: true
     dependencies:
+      - package: Sparkle
       - target: CansNowPlaying
         link: false  # only perl loads it; Cans itself never links it
         embed: true

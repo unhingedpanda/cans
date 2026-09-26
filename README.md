@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <sub>Free and open source · macOS 14+ · 1.3 MB download · no account, no network access</sub>
+  <sub>Free and open source · macOS 14+ · 2.4 MB download · no account; the only network call is the update check</sub>
 </p>
 
 <p align="center">
@@ -101,6 +101,7 @@ Then allow Bluetooth access when asked.
 
 ## Good to know
 
+- **Updates.** From 1.0.2, Cans checks GitHub once a day and marks **Inserts** with an amber dot when a new version is ready; install it from **Inserts → App**. Turn **Automatic updates** off there if you'd rather not. Coming from 1.0.1 or earlier? Update once by hand or with `brew upgrade --cask cans`.
 - **One app at a time.** Only one device can hold Sony's control channel. If Cans says **Busy**, close Sound Connect on your phone; Cans retries on its own.
 - **Keyboard.** ⌥⌘A toggles NC and Ambient from anywhere. While the panel is open, keys 1/2/3 pick Off/NC/Ambient.
 - **Light footprint.** About 8–18 MB of memory, 0% CPU when idle, and about 0.2% while the animated panel is open.

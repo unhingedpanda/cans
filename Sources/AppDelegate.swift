@@ -44,6 +44,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         source.setEventHandler { NSApp.terminate(nil) }
         source.resume()
         terminationSource = source
+        if !isRunningTests, !CommandLine.arguments.contains("-ui-testing") {
+            Updates.shared.start()
+        }
 
         #if MENU_BAR_APP || HYBRID_APP
         menuBarController = MenuBarController(environment: environment)

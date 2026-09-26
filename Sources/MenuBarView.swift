@@ -64,6 +64,7 @@ struct MenuBarView: View {
     @EnvironmentObject private var headphones: SonyHeadphonesController
     @EnvironmentObject private var device: SonyDeviceSettings
     @EnvironmentObject private var settings: SettingsStore
+    @ObservedObject private var updates = Updates.shared
     @StateObject private var nowPlaying = NowPlaying()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var screen: PanelScreen = .dashboard
@@ -194,7 +195,10 @@ struct MenuBarView: View {
             linkLamp
             Spacer(minLength: 4)
             Button { navigate(to: .inserts) } label: {
-                Legend("Inserts", size: 10.5, color: Console.legend)
+                HStack(spacing: 6) {
+                    if updates.availableVersion != nil { UpdatePip() }
+                    Legend("Inserts", size: 10.5, color: Console.legend)
+                }
                     .padding(.horizontal, 10)
                     .frame(height: 26)
                     .background(Console.raised, in: RoundedRectangle(cornerRadius: 4))
@@ -203,8 +207,9 @@ struct MenuBarView: View {
             .buttonStyle(PressStyle())
             .keyboardShortcut(",", modifiers: .command)
             .accessibilityIdentifier("inserts.open")
-            .help("Headphone and app settings (⌘,)")
+            .help(updates.availableVersion.map { "Cans \($0) is ready to install (⌘,)" } ?? "Headphone and app settings (⌘,)")
             .accessibilityLabel("Inserts")
+            .accessibilityValue(updates.availableVersion.map { "Update available: Cans \($0)" } ?? "")
         }
     }
 
@@ -637,6 +642,7 @@ struct MenuBarView: View {
                             .font(.system(size: 12.5, weight: selected ? .semibold : .regular))
                             .foregroundStyle(selected ? Console.legend : Console.dim)
                         Spacer(minLength: 0)
+                        if item == .app, updates.availableVersion != nil { UpdatePip() }
                     }
                     .padding(.horizontal, 10)
                     .frame(height: 30)
@@ -820,12 +826,46 @@ struct MenuBarView: View {
         if let error = settings.launchAtLoginError {
             Text(error).font(.system(size: 11)).foregroundStyle(Console.legend).padding(.top, 8)
         }
+        updateRow
+        RackRow(title: "Automatic updates", detail: "Asks GitHub once a day for a newer Cans") {
+            LatchButton(accessibilityTitle: "Automatic updates", isOn: updates.checksAutomatically) {
+                updates.checksAutomatically.toggle()
+            }
+        }
         RackRow(title: "Support Cans", detail: "Free and open source") {
             LampButton(title: "Buy me a coffee", lit: false, height: 26, fontSize: 10.5) {
                 if let url = URL(string: "https://buymeacoffee.com/yash.raj") { NSWorkspace.shared.open(url) }
             }
             .frame(width: 150)
         }
+    }
+
+    /// Waiting: the version and a lit Update button (Sparkle's sheet installs it).
+    /// Otherwise: the running version, when it last looked, and Check now.
+    private var updateRow: some View {
+        let current = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        return Group {
+            if let version = updates.availableVersion {
+                RackRow(title: "Cans \(version) is ready", detail: "You have \(current). Cans reopens after installing") {
+                    LampButton(title: "Update", lit: true, height: 26, fontSize: 10.5) { updates.checkNow() }
+                        .frame(width: 110)
+                        .accessibilityIdentifier("app.update")
+                }
+            } else {
+                RackRow(title: "Cans \(current)", detail: lastCheckText) {
+                    LampButton(title: "Check now", lit: false, enabled: updates.canCheck, height: 26, fontSize: 10.5) {
+                        updates.checkNow()
+                    }
+                    .frame(width: 110)
+                    .accessibilityIdentifier("app.checkForUpdates")
+                }
+            }
+        }
+    }
+
+    private var lastCheckText: String {
+        guard let date = updates.lastCheck else { return "Not checked for updates yet" }
+        return "Up to date · checked " + date.formatted(.relative(presentation: .named))
     }
 
     private var diagnosticsSection: some View {

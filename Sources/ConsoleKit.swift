@@ -425,6 +425,22 @@ struct RackUnit<Content: View>: View {
     }
 }
 
+/// A small amber lamp: something here is waiting for you (an update). Pulses once as it lights.
+struct UpdatePip: View {
+    @State private var lit = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        Circle()
+            .fill(Console.amber)
+            .frame(width: 6, height: 6)
+            .shadow(color: Console.glow, radius: lit ? 4 : 0)
+            .opacity(lit || reduceMotion ? 1 : 0)
+            .onAppear { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.12)) { lit = true } }
+            .accessibilityHidden(true)
+    }
+}
+
 /// A recessed groove between panel sections.
 struct GrooveSeam: View {
     var body: some View {
