@@ -30,12 +30,13 @@ final class SonyProtocolTests: XCTestCase {
         XCTAssertEqual(EqualizerPreset.off.rawValue, 0x00)
         XCTAssertEqual(EqualizerPreset.bassBoost.rawValue, 0x16)
         XCTAssertEqual(EqualizerPreset.manual.rawValue, 0xA0)
-        XCTAssertFalse(EqualizerPreset.selectableCases.contains(.manual))
         XCTAssertEqual(EqualizerPreset(sonyByte: 0x16), .bassBoost)
         XCTAssertEqual(EqualizerPreset(sonyByte: 0xA1), .custom1)
         XCTAssertEqual(EqualizerPreset(sonyByte: 0xA2), .custom2)
         XCTAssertEqual(EqualizerPreset(sonyByte: 0xFF), .manual)
-        XCTAssertFalse(EqualizerPreset.selectableCases.contains(.custom1))
+        XCTAssertFalse(EqualizerPreset.selectableCases(customSlots: true).contains(.manual))
+        XCTAssertTrue(EqualizerPreset.selectableCases(customSlots: true).contains(.custom2))
+        XCTAssertFalse(EqualizerPreset.selectableCases(customSlots: false).contains(.custom1))
     }
 
     func testCustomEqualizerPayloadRoundTripAndClamping() {

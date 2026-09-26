@@ -77,7 +77,10 @@ enum EqualizerPreset: UInt8, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    static var selectableCases: [Self] { allCases.filter { $0.rawValue < 0xA0 } }
+    /// Custom 1/2 are set with their own byte on MDR v1 (verified on a WH-1000XM4); untested on XM5.
+    static func selectableCases(customSlots: Bool) -> [Self] {
+        allCases.filter { $0 != .manual && (customSlots || $0.rawValue < 0xA0) }
+    }
 }
 
 struct EqualizerSettings: Codable, Equatable, Sendable {

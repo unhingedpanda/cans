@@ -113,7 +113,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
     private var retryAttempt = 0
     private var nextRetryDate: Date?
     private var syncPollCount = 0
-    private var isV1 = false
+    private(set) var isV1 = false
     private var batteryRequest: [UInt8] { isV1 ? [0x10, 0x00] : [0x22, 0x00] }
     private var equalizerType: UInt8 { isV1 ? 0x01 : 0x00 }
     private var equalizerRequest: [UInt8] { [0x56, equalizerType] }

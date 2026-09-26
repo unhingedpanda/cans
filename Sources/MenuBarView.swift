@@ -363,16 +363,11 @@ struct MenuBarView: View {
 
     private var equalizerMenu: some View {
         Menu {
-            ForEach(EqualizerPreset.selectableCases) { preset in
-                Button {
-                    headphones.setEqualizerPreset(preset)
-                } label: {
-                    if headphones.equalizerPreset == preset {
-                        Label(preset.title, systemImage: "checkmark")
-                    } else {
-                        Text(preset.title)
-                    }
-                }
+            ForEach(EqualizerPreset.selectableCases(customSlots: headphones.isV1)) { preset in
+                // A Toggle gets the native menu checkmark; a Label's icon isn't drawn in macOS menus.
+                Toggle(preset.title, isOn: Binding(
+                    get: { headphones.equalizerPreset == preset },
+                    set: { _ in headphones.setEqualizerPreset(preset) }))
             }
             if !settings.equalizerProfiles.isEmpty {
                 Divider()
