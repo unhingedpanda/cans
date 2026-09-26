@@ -142,6 +142,20 @@ final class HardwareE2ETests: XCTestCase {
         XCTAssertEqual(v7, originalPreset)
     }
 
+    /// Custom 1/2 (A1/A2) were read as unknown and locked the EQ (issue #2).
+    func testCustomSlotsReadBack() async throws {
+        let originalPreset = try await reload("EQ") { self.hp.equalizerPreset }
+        let originalCurve = hp.customEqualizer
+        for slot in [EqualizerPreset.custom1, .custom2] {
+            hp.setEqualizerPreset(slot)
+            let held = try await reload(slot.title) { self.hp.equalizerPreset }
+            XCTAssertEqual(held, slot)
+        }
+        if originalPreset == .manual { hp.setCustomEqualizer(originalCurve) } else { hp.setEqualizerPreset(originalPreset) }
+        let restored = try await reload("EQ restore") { self.hp.equalizerPreset }
+        XCTAssertEqual(restored, originalPreset)
+    }
+
     // MARK: Inserts
 
     func testDSEEExtreme() async throws {

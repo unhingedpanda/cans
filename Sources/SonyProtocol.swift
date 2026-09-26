@@ -52,8 +52,13 @@ enum EqualizerPreset: UInt8, CaseIterable, Identifiable, Sendable {
     case bassBoost = 0x16
     case speech = 0x17
     case manual = 0xA0
+    case custom1 = 0xA1
+    case custom2 = 0xA2
 
     var id: Self { self }
+
+    /// Any value that isn't a named preset (e.g. the XM4's FF custom curve) is a custom curve.
+    init(sonyByte: UInt8) { self = Self(rawValue: sonyByte) ?? .manual }
 
     var title: String {
         switch self {
@@ -67,10 +72,12 @@ enum EqualizerPreset: UInt8, CaseIterable, Identifiable, Sendable {
         case .bassBoost: "Bass Boost"
         case .speech: "Speech"
         case .manual: "Manual"
+        case .custom1: "Custom 1"
+        case .custom2: "Custom 2"
         }
     }
 
-    static var selectableCases: [Self] { allCases.filter { $0 != .manual } }
+    static var selectableCases: [Self] { allCases.filter { $0.rawValue < 0xA0 } }
 }
 
 struct EqualizerSettings: Codable, Equatable, Sendable {

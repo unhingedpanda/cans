@@ -637,7 +637,7 @@ final class SonyHeadphonesController: NSObject, ObservableObject {
 
     private func parseEqualizer(_ payload: [UInt8]) {
         guard payload.count >= 3, payload[1] == equalizerType else { return }
-        equalizerPreset = EqualizerPreset(rawValue: payload[2])
+        equalizerPreset = EqualizerPreset(sonyByte: payload[2])
         var normalized = payload
         normalized[1] = 0x00
         if let settings = EqualizerSettings(sonyPayload: normalized) {
